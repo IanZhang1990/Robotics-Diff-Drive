@@ -92,5 +92,6 @@ pygame.quit();
 
 sampler = Sampler( gameWorld );
 
-sampler.sample(100);
-sampler.save_data('spheres.txt');
+##sampler.sample(100);
+sampler.sampleSlice( math.pi/4 );
+sampler.save_data('spheres_complete.txt');

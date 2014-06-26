@@ -73,3 +73,14 @@ def point2LineDist( point, end1, end2):
         return math.sqrt( bc[0]**2 + bc[1]**2 );
     else:
         return math.fabs( ab[0]*ac[1]-ab[1]*ac[0] ) / math.sqrt( ab[0]**2 + ab[1]**2 );
+
+def progressBar(self, percentage):
+    percStr = ""
+    for i in range( 0, int(percentage) ):
+        percStr += '|';
+    for i in range(int(percentage), 100):
+        percStr += '-'
+    clear = lambda: os.system('clear');
+    clear();
+    print percStr;
+    print "{0:.2f} %".format( percentage );

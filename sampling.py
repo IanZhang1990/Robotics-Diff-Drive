@@ -1,5 +1,5 @@
 
-import sys
+import sys, os
 import random
 from robot import *
 from obstacles import *
@@ -90,20 +90,54 @@ class Sampler:
 			self.partition.addSphere( sphere );
 			self.samples.append( sphere );
 
-	def sampleSlice( self, theta ):
-		'''complete sample when the orientation of robot is set to @theta'''
-		for i = range( 0, self.world.WIDTH/4.0 ):
-			for j = range( 0, self.world.HEIGHT/4.0 ):
+	def sampleSlice( self, theta, check=False ):
+		'''complete sample when the orientation of robot is set to @theta
+		@param theta: the fixed orientation
+		@param check: True or False for check(or not) a point is inside any existing spheres'''
+		for i in range( 0, int(self.world.WIDTH/4) ):
+			for j in range( 0, int(self.world.HEIGHT/4) ):
+				if( j % 30 == 0 ):
+					percentage = (i*self.world.WIDTH/4.0 + j)/(self.world.WIDTH*self.world.HEIGHT/16)*100.0;
+					self.progressBar(percentage);
 				x = 4.0*i; y = 4.0 * j;
+				config  = Config( v2(x, y), theta );
+				config_ = self.mapper.map( config );
+
+				if check and not self.partition.checkValid( (config_.x, config_.y, config_.orient) ):
+					continue;
+			
+				# valid point	
+				self.robot.setConfig( config );
+				clearance = self.obstMgr.time2obsts( self.robot, self.mapper );
+				if clearance <= 0.1:
+					continue;				# disgard too small spheres
+				sphere = self.getSphere( config, clearance );
+				self.partition.addSphere( sphere );
+				self.samples.append( sphere );
+		self.progressBar(100);
+
+	def clearConsole(self):
+		clear = lambda: os.system('clear');
+		clear();
+
+	def progressBar(self, percentage):
+		percStr = ""
+		for i in range( 0, int(percentage) ):
+			percStr += '|';
+		for i in range(int(percentage), 100):
+			percStr += '-'
+		self.clearConsole();
+		print percStr;
+		print "{0:.2f} %".format( percentage );
 
 	def save_data( self, filename ):
 		'''Save sampled spheres. Write data to a file'''
 		file2write = open( filename, 'w' );
 		formattedData = "";
 		for sphere in self.samples:
-			#formattedData += str( sphere.center[0] ) + "\t";
+			formattedData += str( sphere.center[0] ) + "\t";
 			formattedData += str( sphere.center[1] ) + "\t";
-			formattedData += str( sphere.center[2] ) + "\t";
+			#formattedData += str( sphere.center[2] ) + "\t";
 			formattedData += str( sphere.radius);
 			formattedData += "\n";
 
