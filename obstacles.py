@@ -49,6 +49,17 @@ class Polygon:
 		else:
 			return False;
 
+	def closest_point(self, point):
+		'''get the nearest point in the polygon to a point'''
+		nearestPoint = None;
+		minDist = 100000000;
+		for line in self.lines:
+			temp = line.closest_point( point );
+			dist = math.sqrt( (point.x-temp.x)**2 + (point.y-temp.y)**2);
+			if dist < minDist:
+				nearestPoint = temp;
+				minDist = dist;
+		return nearestPoint, minDist;
 
 
 class ObstManager:
@@ -77,6 +88,24 @@ class ObstManager:
 		'''return the min time for a robot to collide with any obstacles'''
 		dist = self.dist2obsts(robot);
 		return dist / 20.0;
+
+	def closest_point(self, point):
+		'''get the nearest point in obstacles to a point'''
+		minDist = 10000000000;
+		nearest = None;
+		for obst in self.obsts:
+			near, dist = obst.closest_point(point);
+			if dist < minDist:
+				nearest = near;
+				minDist = dist;
+		return nearest, minDist;
+
+	def inside( self, pnt ):
+		'''test if a point is inside any polygon'''
+		for obst in self.obsts:
+			if obst.inside(pnt):
+				return True;
+		return False;
 
 	def render(self, surf):
 		for obst in self.obsts:

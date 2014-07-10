@@ -1,4 +1,5 @@
 import math;
+import sys, os;
 
 def euclideanDist( config1, config2 ):
     length = len(config1);
@@ -74,7 +75,7 @@ def point2LineDist( point, end1, end2):
     else:
         return math.fabs( ab[0]*ac[1]-ab[1]*ac[0] ) / math.sqrt( ab[0]**2 + ab[1]**2 );
 
-def progressBar(self, percentage):
+def progressBar( percentage):
     percStr = ""
     for i in range( 0, int(percentage) ):
         percStr += '|';
