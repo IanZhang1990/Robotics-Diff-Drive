@@ -206,7 +206,6 @@ class MAPRMSampler:
 
 		while not que.empty():
 			sample = que.get();
-			print sample;
 			newSamps = getNewSample( sample, cost );
 			if len(samples) > 2:
 				ifwithin = False;
@@ -225,8 +224,11 @@ class MAPRMSampler:
     			for newsamp in newSamps:
     				samples.append(newsamp);
     				que.put(newsamp);
-    				print que.empty();
+    				print que.qsize();
+    			continue;
 
+
+    	print que.qsize();
 		return samples;
 
 
