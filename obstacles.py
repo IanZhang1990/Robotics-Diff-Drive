@@ -5,6 +5,7 @@ class Polygon:
 	"""Polygon class. An obstacle is defined as a polygon."""
 	def __init__( self, ptlist ):
 		"""@param ptlist: points list or tuple list, anti-clockwise ordered."""
+		self.vertices = ptlist;
 		self.lines = [];
 		for i in range(1, len(ptlist)):
 			line  = line_segment(ptlist[i-1], ptlist[i]);
