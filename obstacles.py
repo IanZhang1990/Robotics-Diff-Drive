@@ -79,8 +79,6 @@ class ObstManager:
 	def dist2obsts(self, robot):
 		'''return the min dist from the robot to any obstacles.'''
 		dists = [];
-		if self.intersects( robot ):
-			return 0;
 		for obst in self.obsts:
 			dists.append( obst.dist2robot(robot) );
 		return min(dists);
@@ -99,7 +97,11 @@ class ObstManager:
 			if dist < minDist:
 				nearest = near;
 				minDist = dist;
-		return nearest, minDist;
+
+		inside = 1;
+		if self.inside(point):
+			inside = -1;
+		return nearest, minDist*inside;
 
 	def inside( self, pnt ):
 		'''test if a point is inside any polygon'''

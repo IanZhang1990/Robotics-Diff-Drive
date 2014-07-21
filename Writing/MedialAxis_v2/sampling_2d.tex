@@ -1,0 +1,68 @@
+\documentclass[12pt]{article}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{graphicx}
+\DeclareGraphicsExtensions{.pdf,.png,.jpg}
+\usepackage{algpseudocode}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{definition}[theorem]{Definition}
+
+
+\title{Sampling}
+\date{}
+\begin{document}
+  \maketitle
+  
+  \section{Sampling Uniformly on Medial Axis}
+  \cite{jory} proposed an algorithm for sampling uniformly on medial axis. The key idea is: Randomly put a lot of sticks(line segments) with random orientations in the free-space, whatever dimensions it has. Since these sticks are uniformly distributed in the space, any surface will uniformly intersect with these sticks. Medial axis will also intersect with these sticks uniformly.\\
+  
+  Algorithm is as below:\\
+  
+  \begin{algorithmic}
+    \State $maSamples \gets$ Empty Set.
+    \State $pntset \gets$ randomly generated points in free space.
+    \State $l \gets $ stick length.	 
+	\For{$point \in pntset$}
+		\State $dir \gets$ random direction  
+		\State $stick \gets$ ( point, l, dir ) \Comment{start point + length + direction = a stick}
+		\If{ $stick$ intersects with the medial axis }
+		
+			$sample \gets$ stick.search()
+			
+			$radius \gets$ clearance( sample ) \Comment{get the clearance at this point}
+			
+			$maSamples.append( ball(sample, radius) )$
+		\EndIf
+	\EndFor
+	
+	\noindent \Return $maSamples$;
+  \end{algorithmic}
+ 
+  \section{Sampling Balls Outside MA Samples }
+  
+  The idea of my algorithm is when we have a lot of random points in free space and some big discs on the medial axis, we don't want to waste points inside existing discs, instead, we "push" them to the boundary of these discs, and get new samples.
+  
+  Testing if a point is inside some discs seems to be a $O(n^2)$ time problem. But it can actually be done by choosing k-nearest neighbors of the centers of discs. Suppose in a 2D free space, we have some uniformly distributed points. They are uniformly distributed so, in a unit area, the expectation of the number of points is fixed. Assume a disc has radius $r$, its area is monotonic to $r^2$. Therefore the number of points inside the disc is monotonic to $r^2$, meaning that if we choose k-nearest points to the center of the disc, (k is a function of $r^2$), they are very likely to be inside the disc. There is no harm if some points are not actually inside the disc or some inside points are left, we only want to use these points to generate some points on the boundary of the disc by extending them in the direction from center to each of them. In fact, we want to choose a $k$ that is larger than the actual number of points inside.
+  
+  Since all discs touch obstacles, by choosing a larger $k$, we are virtually extending the radius of our discs, which results in a smaller density in arcs that are very close to obstacles than those far from obstacles.
+  
+  Now we have dense points on the boundary of existing discs. Using these points to sample new small discs to cover undiscovered area has some benefits compare with points not covered by any discs:
+  
+  1. They are more likely to get discs with larger radius. 
+  
+  2. They are less likely to left some holes between discs. 
+  
+  3. Experiments shows, initially, we need much less random points in the free space.
+  
+  \begin{thebibliography}{1}
+
+  \bibitem{steven} Steven A. Wilmarth, Nancy M. Amato, Peter F. Stiller. "MAPRM: A Probabilistic Roadmap Planner with Sampling on the Medial Axis of the Free Space", In Proc. IEEE Int. Conf. Robot. Autom. (ICRA), pp. 1024-1031, Detroit, MI, May 1999. Also, Technical Report, TR98-0022, Department of Computer Science and Engineering, Texas A \& M University, Nov 1998.
+  
+  \bibitem{jory} Uniform Medial Axis Sampling.
+   
+  \end{thebibliography}
+  
+\end{document}
+  
