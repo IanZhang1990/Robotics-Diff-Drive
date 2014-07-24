@@ -176,7 +176,7 @@ class SamplerV2:
 		for sphere in self.samples:
 			formattedData += str( sphere.center[0] ) + "\t";
 			formattedData += str( sphere.center[1] ) + "\t";
-			#formattedData += str( sphere.center[2] ) + "\t";
+			formattedData += str( sphere.center[2] ) + "\t";
 			formattedData += str( sphere.radius);
 			formattedData += "\n";
 
