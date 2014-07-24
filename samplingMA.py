@@ -181,7 +181,7 @@ class SamplerV2:
 				self.partition.addSphere( sphere );
 
 
-	def __sampleMA__(self, pntset, rho ):
+	def __sampleMA__(self, pntset, rho = None ):
 		'''Sample spheres centered on Medial Axis in c-space.
 		@param pntset: A set of random points in free space. Coordinates are mapped.
 		@param rho   : number of points per unit volume.    '''
@@ -234,10 +234,33 @@ class SamplerV2:
 
 		spaceSize = self.mapper.scaledSpaceSize();
 		rho = float(n)/float( spaceSize[0]*spaceSize[1]*spaceSize[2] );
-		self.__sampleMA__(pntset, rho);
+		self.__sampleMA__(pntset);
 
 		self.samples += self.maSamples;
 
 		return self.maSamples;
 
+    	def randsample(self, n):
+		'''Sample spheres in c-space
+		@param n: (int) number of random points in free space'''
+		pntset = [];
+		for i in range(0, n):
+			#progressBar( float(len(pntset)) / n * 100);
+			rand_x 	   = random.randint( 0, self.world.WIDTH );
+			rand_y 	   = random.randint( 0, self.world.HEIGHT);
+			rand_theta = 0; #random.uniform( 0, 2*math.pi );
 
+			config  = Config(v2(rand_x, rand_y), rand_theta);
+			config_ = self.mapper.map( config );
+
+			if not self.partition.checkValid( v3(config_.x, config_.y, config_.orient) ):
+				continue;
+
+			# valid point	
+			self.robot.setConfig( config );
+			clearance = self.obstMgr.time2obsts( self.robot, self.mapper );
+			if clearance <= 0.1:
+				continue;				# disgard too small spheres
+			sphere = self.getSphere( config, clearance );
+			self.partition.addSphere( sphere );
+			self.samples.append( sphere );
