@@ -252,12 +252,15 @@ class SamplerV2:
 
 			config  = Config(v2(rand_x, rand_y), rand_theta);
 			config_ = self.mapper.map( config );
+			self.robot.setConfig( config );
+			if self.obstMgr.intersects( self.robot ):
+				continue;
 
 			if not self.partition.checkValid( v3(config_.x, config_.y, config_.orient) ):
 				continue;
 
 			# valid point	
-			self.robot.setConfig( config );
+			
 			clearance = self.obstMgr.time2obsts( self.robot, self.mapper );
 			if clearance <= 0.1:
 				continue;				# disgard too small spheres
