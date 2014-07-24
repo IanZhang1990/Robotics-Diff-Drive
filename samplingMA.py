@@ -25,13 +25,18 @@ class LineSearch:
 		if dir is None:
 			return;
 
+
 		end = start + dir*length;
+
+		'''
 		if self.dist2Obst(start) > self.dist2Obst(end):
 			self.start = start;
 			self.end   = end;
 		else:
 			self.start = end;
-			self.end   = start;
+			self.end   = start;'''
+		self.start = start;
+		self.end = end;
 		pass;
 
 	def dist2Obst(self, pnt):
