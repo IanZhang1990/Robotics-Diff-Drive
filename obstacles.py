@@ -77,6 +77,8 @@ class ObstManager:
 
 	def intersects(self, robot):
 		'''determine if the robot intersects with any obstacles in the space'''
+		if self.inside( robot.position() ):
+			return True;
 		for obst in self.obsts:
 			if( robot.intersects(obst) ):
 				return True;
