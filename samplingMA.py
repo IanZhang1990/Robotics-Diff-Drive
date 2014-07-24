@@ -189,6 +189,7 @@ class SamplerV2:
 		self.maSamples = [];
 		for point in pntset:
 			#Check if within any balls.
+			'''
 			good = True;
 			currentGridBalls = self.partition.getCurrentGridSpheres( point );
 			for ball in currentGridBalls:
@@ -198,7 +199,7 @@ class SamplerV2:
 
 			if not good:
 				continue;
-
+			'''
 			dir_x = random.randint( -100, 100 );
 			dir_y = random.randint( -100, 100 );
 			dir_z = 0; #random.randint( -100, 100 );
@@ -224,7 +225,7 @@ class SamplerV2:
 			#progressBar( float(len(pntset)) / n * 100);
 			rand_x 	   = random.randint( 0, self.world.WIDTH );
 			rand_y 	   = random.randint( 0, self.world.HEIGHT);
-			rand_theta = 0;#random.uniform( 0, 2*math.pi );
+			rand_theta = math.pi/2.0;#random.uniform( 0, 2*math.pi );
 
 			config  = Config(v2(rand_x, rand_y), rand_theta);
 			self.robot.setConfig( config );
