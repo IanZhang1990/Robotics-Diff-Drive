@@ -91,10 +91,10 @@ class ObstManager:
 			dists.append( obst.dist2robot(robot) );
 		return min(dists);
 
-	def time2obsts(self, robot, mapper):
+	def time2obsts(self, robot):
 		'''return the min time for a robot to collide with any obstacles'''
 		dist = self.dist2obsts(robot);
-		return dist / 20.0;
+		return dist / 5.0;
 
 	def closest_point(self, point):
 		'''get the nearest point in obstacles to a point. 

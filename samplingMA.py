@@ -45,7 +45,7 @@ class LineSearch:
 		config_ = Config( v2(pnt.x, pnt.y), pnt.z );
 		config  = self.mapper.unmap(config_);
 		self.robot.setConfig(config);
-		timeclearance = self.obstMgr.time2obsts( self.robot, self.mapper );
+		timeclearance = self.obstMgr.time2obsts( self.robot );
 		return timeclearance;
 
 	def search(self):
@@ -59,17 +59,16 @@ class LineSearch:
 			this_dist = self.dist2Obst(temp);
 			this_increase = ((this_dist-last_dist)>0);
 			#print this_dist;
+			if this_dist == 0.0:
+				return None, None;
 			if last_increse and not this_increase:
-				return temp, this_dist;
-				'''
-				config_ = Config( v2(temp.x, temp.y), te.z );
+				config_ = Config( v2(temp.x, temp.y), temp.z );
 				config  = self.mapper.unmap(config_);
 				self.robot.setConfig(config);
 				if not self.obstMgr.intersects(self.robot):
 					return temp, this_dist;
 				else:
 					return None, None;
-				'''
 			else:
 				t += 1;
 				last_increse = this_increase;
@@ -213,7 +212,7 @@ class SamplerV2:
 			'''
 			dir_x = random.randint( -100, 100 );
 			dir_y = random.randint( -100, 100 );
-			dir_z = 0; #random.randint( -100, 100 );
+			dir_z = 0;#random.randint( -100, 100 );
 			if dir_x == dir_y == dir_z == 0:
 				dir_x = dir_y = dir_z = 50;
 			rand_dir = v3(dir_x, dir_y, dir_z);
@@ -273,7 +272,7 @@ class SamplerV2:
 
 			# valid point	
 			
-			clearance = self.obstMgr.time2obsts( self.robot, self.mapper );
+			clearance = self.obstMgr.time2obsts( self.robot );
 			if clearance <= 0.1:
 				continue;				# disgard too small spheres
 			sphere = self.getSphere( config, clearance );
