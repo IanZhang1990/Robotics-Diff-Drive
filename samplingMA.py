@@ -26,7 +26,7 @@ class LineSearch:
 			return;
 
 		end = start + dir*length;
-		if self.dist2Obst(start) < self.dist2Obst(end):
+		if self.dist2Obst(start) > self.dist2Obst(end):
 			self.start = start;
 			self.end   = end;
 		else:
@@ -55,10 +55,16 @@ class LineSearch:
 			this_increase = ((this_dist-last_dist)>0);
 			#print this_dist;
 			if last_increse and not this_increase:
+				return temp, this_dist;
+				'''
+				config_ = Config( v2(temp.x, temp.y), te.z );
+				config  = self.mapper.unmap(config_);
+				self.robot.setConfig(config);
 				if not self.obstMgr.intersects(self.robot):
 					return temp, this_dist;
 				else:
 					return None, None;
+				'''
 			else:
 				t += 1;
 				last_increse = this_increase;
@@ -225,7 +231,7 @@ class SamplerV2:
 			#progressBar( float(len(pntset)) / n * 100);
 			rand_x 	   = random.randint( 0, self.world.WIDTH );
 			rand_y 	   = random.randint( 0, self.world.HEIGHT);
-			rand_theta = math.pi/2.0;#random.uniform( 0, 2*math.pi );
+			rand_theta = math.pi/4.0;#random.uniform( 0, 2*math.pi );
 
 			config  = Config(v2(rand_x, rand_y), rand_theta);
 			self.robot.setConfig( config );
