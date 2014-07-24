@@ -5,7 +5,8 @@ import math
 
 from obstacles import *
 from robot import *
-from sampling import *
+from samplingMA import *
+from geometry import *
 
 
 class World:
@@ -90,8 +91,9 @@ pygame.quit();
 #####                   Sample
 ##################################################
 
-sampler = Sampler( gameWorld );
 
-##sampler.sample(100);
-sampler.sampleSlice( math.pi/4 );
+sampler = SamplerV2( gameWorld );
+
+sampler.sample(1000);
+#sampler.sampleSlice( math.pi/4 );
 sampler.save_data('spheres_complete.txt');

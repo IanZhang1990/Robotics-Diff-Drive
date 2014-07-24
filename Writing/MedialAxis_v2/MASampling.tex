@@ -20,24 +20,26 @@
   
   Algorithm is as below:\\
   
-  \begin{algorithmic}
-    \State $maSamples \gets$ Empty Set.
+  \begin{algorithmic}[1]
+  \Function{UniformSampleMA}{pntset}
     \State $pntset \gets$ randomly generated points in free space.
+    \State $maSamples \gets$ Empty Set.
     \State $l \gets $ stick length.	 
 	\For{$point \in pntset$}
 		\State $dir \gets$ random direction  
-		\State $stick \gets$ ( point, l, dir ) \Comment{start point + length + direction = a stick}
+		\State $stick \gets$ ( point, l, dir ) \Comment{start point+length+direction=a stick}
 		\If{ $stick$ intersects with the medial axis }
 		
-			$sample \gets$ stick.search()
+			\indent\indent $sample \gets$ stick.search()
 			
-			$radius \gets$ clearance( sample ) \Comment{get the clearance at this point}
+			\indent\indent $radius \gets$ clearance( sample ) \Comment{get the clearance at this point}
 			
-			$maSamples.append( ball(sample, radius) )$
+			\indent\indent $maSamples.append( ball(sample, radius) )$
 		\EndIf
 	\EndFor
 	
-	\noindent \Return $maSamples$;
+	\Return $maSamples$;
+  \EndFunction
   \end{algorithmic}
  
   \section{Sampling Balls Outside MA Samples }
@@ -55,6 +57,65 @@
   2. They are less likely to left some holes between discs. 
   
   3. Experiments shows, initially, we need much less random points in the free space.
+  
+
+  \subsection{Algorithm}
+  
+  \begin{algorithmic}[1]
+  \Function{SampleDiscs}{ n }
+    \State $pntset \gets$ n points uniformly distributed in free space
+  	\State $maSamples \gets$ UniformSampleMA($pntset$) \Comment{Get discs on MA}
+  	\State $bndSamples \gets EmptySet$ \Comment{Set of discs not on MA}
+  	\State $newDisc \gets$ True	\Comment{If we can get new discs}
+  	\State $lastRoundDiscs \gets maSamples$
+  	\While{$newDisc$}
+  		\State $newDisc \gets False$
+		\State $bndpnts \gets EmptySet$ \Comment{A set of disc boundary points}  		
+  		\For {$disc \in lastRoundDiscs$}
+  		
+  			\indent\indent $disc.KNearest(pntset)$; \Comment{Use k-nearest to get points inside it.}
+  			
+  			\indent\indent $bndpnts.append( disc.getBoundaryPoints() )$
+  		\EndFor
+  		\State $lastRoundDiscs \gets EmptySet$
+  		
+  		\For{$point \in bndpnts$}
+  			\If{$point$ not inside any existing discs} \Comment{$O(n^2)$ time}
+  				\indent\indent\indent $disc \gets getNewDisc(point)$ \Comment{get a new disc}
+  				\If{$disc.radius \geq minRadius$}
+  				
+  					\indent\indent\indent\indent $newDisc \gets True$
+  					
+  					\indent\indent\indent\indent $lastRoundDiscs.append( disc )$
+  					
+  					\indent\indent\indent\indent $bndSamples.append(disc);$
+  				\EndIf
+  			\EndIf
+  			
+  		\EndFor
+  	\EndWhile
+  	
+  	\Return $maSamples$, $bndSamples$
+  \EndFunction
+  \end{algorithmic}
+  
+  \section{Build Topology PRM using MA Samples}
+  In last section, our algorithm returns two sets of discs: 1. discs centered on Medial Axis, 2. discs centered on somewhere else. What is useful for representing the topology of the space using the centers of Medial Axis samples to construct a graph. 
+  
+  Problem is, can we simplify the graph even more? Because the simpler our graph is, the faster we can find a path, and the less memory we need to represent a very large environment. 
+  
+  \subsection{Some thoughts}
+  "Discs" mention in this subsection are discs centered on the Medial Axis.
+  \begin{enumerate}
+	\item Some discs are more important than others. For example, in a 2d word, a disc connects with only two other discs is less important than a disc that connects with 3 or 4 or more discs, because by connecting more discs, a disc can provide more routes.
+
+    \item I guess those "more important" centers are very likely to form clusters. By clustering them, i think we can do clustering and get the center of each cluster.
+	
+	\item Choose these "more important" centers as initial vertices of our simpler graph. For every pair of vertices, find the shortest chain of discs that connects them, using A* search. If the chain doesn't contain any discs centered at other important vertices, keep it.
+	
+	\item Now we need to reduce some disc centers in each chain. It could be done by binary search for points that connect the start and end vertices of the chain. In the best case, all points except for the start and end vertices are reduced. In the worst case, all points are kept.
+	
+  \end{enumerate}
   
   \begin{thebibliography}{1}
 

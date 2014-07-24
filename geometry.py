@@ -12,6 +12,9 @@ A small library of 2D geometric primitives.
  - circle:       a circle in the plane.
  - arc:          a directed arc of a circle.
  - path:         a list of line_segment and arc objects.
+
+--------------------------
+Modified by Yinan Zhang.
 """
 
 import pygame
@@ -24,7 +27,7 @@ from math import sqrt, pi, degrees, radians, cos, sin, acos, asin, atan2
 
 __all__ = [
   'pi', 'degrees', # re-exported from math
-  'angle', 'v2', 'line_segment', 'circle', 'arc', 'path',
+  'angle', 'v2', 'v3', 'line_segment', 'circle', 'arc', 'path',
 ]
  
 
@@ -72,6 +75,12 @@ class v2( object ):
     return self.x != other.x or  self.y != other.y
   def __hash__( self ):
     return hash(( self.x, self.y ))
+
+  def __len__(self):
+    return 2;
+
+  def __getitem__(self, key):
+    return (self.x, self.y)[key];
 
 
   def rsq( self ):
@@ -156,6 +165,135 @@ class v2( object ):
   def __complex__( self ):
     return self.x + 1j*self.y
 
+
+#========================================================================================
+# 3D vector
+#========================================================================================
+class v3( object ):
+  'Represents a 3D point with coordinates (x,y).'
+  __slots__ = ['x','y','z']
+
+  def __init__( self, x, y, z ):
+    self.x = x
+    self.y = y
+    self.z = z
+
+  '''
+  @classmethod
+  def polar( cls, r, radians ):
+    'Construct a vector from a length and angle.'
+    return cls( r*cos(radians), r*sin(radians) )
+
+  @classmethod
+  def from_angle( cls, radians ):
+    'Construct a unit vector from an angle.'
+    return cls( cos(radians), sin(radians) )
+  '''
+
+  def __str__( self ):
+    return '(%.3f,%.3f,%.3f)' % ( self.x, self.y, self.z )
+  def __repr__( self ):
+    return 'v3(%r,%r,%r)' % ( self.x, self.y, self.z )
+
+  def __eq__( self, other ):
+    return self.x == other.x and self.y == other.y and self.z == other.z
+  def __ne__( self, other ):
+    return self.x != other.x or  self.y != other.y or self.z != other.z
+  def __hash__( self ):
+    return hash(( self.x, self.y, self.z ))
+
+  def __len__(self):
+    return 3;
+  def __getitem__(self, key):
+    return (self.x, self.y, self.z)[key];
+
+
+  def rsq( self ):
+    'Return the squared length of the vector.'
+    x, y, z = self.x, self.y, self.z
+    return ( x*x + y*y +z*z )
+
+  def r( self ):
+    'Return the length of the vector.'
+    x, y, z = self.x, self.y, self.z
+    return sqrt( x*x + y*y + z*z )
+
+  length = r # alias
+
+  def dot( self, other ):
+    'Return the dot product of two vectors.'
+    return self.x*other.x + self.y*other.y + self.z*other.z
+
+  '''
+  def radians( self ):
+    'Return the angle of the vector to the x-axis in counterclockwise radians.'
+    return atan2( self.y, self.x )
+  def degrees( self ):
+    'Return the angle of the vector to the x-axis in counterclockwise degrees.'
+    return atan2( self.y, self.x )
+
+  def rotate_90( self ):
+    Return this vector rotated by 90 degrees counterclockwise. (In complex
+    notation, equivalent to multiplying by i.)
+    return v2( -self.y, self.x )
+  
+  def rotate( self, angle ):
+    'Return this vector rotated by `angle` radians counterclockwise.'
+    x, y = self.x, self.y
+    c, s = cos(angle), sin(angle)
+    return v2( x*c - y*s, x*s + y*c )
+  '''
+  def normalize( self ):
+    'Return this vector normalized to a unit vector.'
+    return self / self.r()
+
+  def __add__( self, other ):
+    return v3( self.x + other.x, self.y + other.y, self.z + other.z )
+  def __sub__( self, other ):
+    return v3( self.x - other.x, self.y - other.y, self.z - other.z )
+  def __iadd__( self, other ):
+    self.x += other.x
+    self.y += other.y
+    self.z += other.z
+    return self
+  def __isub__( self, other ):
+    self.x -= other.x
+    self.y -= other.y
+    self.z -= other.z
+    return self
+
+  def __mul__( self, other ):
+    return v3( self.x * other, self.y * other, self.z * other )
+  def __rmul__( self, other ):
+    return v3( other * self.x, other * self.y, other * self.z )
+  def __imul__( self, other ):
+    self.x *= other
+    self.y *= other
+    self.z *= other
+    return self
+
+  def __div__( self, other ):
+    return v3( self.x / other, self.y / other, self.z / other )
+  def __truediv__( self, other ):
+    return v3( self.x / other, self.y / other, self.z / other )
+  def __idiv__( self, other ):
+    self.x /= other
+    self.y /= other
+    self.z /= other
+    return self
+  def __itruediv__( self, other ):
+    self.x /= other
+    self.y /= other
+    self.z /= other
+    return self
+
+  def __pos__( self ):
+    return self
+  def __neg__( self ):
+    return v3( -self.x, -self.y, -self.z )
+
+  #def __complex__( self ):
+  #  return self.x + 1j*self.y
 
 #========================================================================================
 # Line Segment
@@ -270,11 +408,6 @@ class circle( object ):
     return '%.3f@%s' % ( self.radius, self.center )
   def __repr__( self ):
     return 'circle(%r,%r)' % ( self.radius, self.center )
-
-  def jgraph( self ):
-    'Render as a jgraph command.'
-    return 'newcurve pts %f %f marktype circle marksize %f %f fill 1\n' % (
-      self.center.x, self.center.y, 2*self.radius, 2*self.radius )
 
   def __eq__( self, other ):
     return self.radius == other.radius and self.center == other.center

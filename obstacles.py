@@ -1,5 +1,6 @@
 from geometry import *
 from robot import *
+import pygame
 
 class Polygon:
 	"""Polygon class. An obstacle is defined as a polygon."""
@@ -18,8 +19,13 @@ class Polygon:
 
 	def render(self, surface, color):
 		"""render the polygon to surface."""
-		for line in self.lines:
-			line.render(surface, color, 1);
+		#for line in self.lines:
+		#	line.render(surface, color, 1);
+		#pass;
+		pointlist = [];
+		for vertex in self.vertices:
+			pointlist.append( (int(vertex.x), int(vertex.y)) );
+		pygame.draw.polygon(surface, color, pointlist);
 		pass;
 
 	def intersects(self, robot):
@@ -89,7 +95,8 @@ class ObstManager:
 		return dist / 20.0;
 
 	def closest_point(self, point):
-		'''get the nearest point in obstacles to a point'''
+		'''get the nearest point in obstacles to a point. 
+		!!!This works only in 2d c-space!!!'''
 		minDist = 10000000000;
 		nearest = None;
 		for obst in self.obsts:
@@ -104,7 +111,8 @@ class ObstManager:
 		return nearest, minDist*inside;
 
 	def inside( self, pnt ):
-		'''test if a point is inside any polygon'''
+		'''test if a point is inside any polygon.
+		!!!This works only in 2d c-space!!!'''
 		for obst in self.obsts:
 			if obst.inside(pnt):
 				return True;

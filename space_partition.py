@@ -116,6 +116,12 @@ class SpacePartition:
         idx = self.indxHash( point );
         return self.mGrids[idx];
 
+    def getCurrentGridSpheres(self, point):
+        '''Given a point in n-D world, find the grid that contains it. 
+        And return all the spheres in the grid'''
+        grid = self.getContainingGrid(point);
+        return grid.container;
+
     def checkValid( self, point ):
         '''Check if a point is inside any spheres'''
         grid = self.getContainingGrid( point );

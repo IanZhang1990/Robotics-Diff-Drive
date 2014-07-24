@@ -13,6 +13,7 @@ class CoordMapping:
 		self.height = height;
 
 	def map(self, config):
+		'''Map a config from origin space to a scaled space'''
 		x_     = ((float(config.x) / float(self.width)) * 100.0) / (math.pi/2+1.0);
 		y_     = ((float(config.y) / float(self.height))* 100.0) / (math.pi/2+1.0);
 		theta_ = (float(config.orient)/ (2 * math.pi)) * 100.0;
@@ -29,6 +30,9 @@ class CoordMapping:
 		y 	  = float( config.y ) * (math.pi/2+1.0) * float(self.width) / 100.0;
 		theta = float( config.orient) * (2 * math.pi) / 100.0;
 		return Config( v2(x,y), theta ); 
+
+	def scaledSpaceSize(self):
+		return (100, 100, 100);
 
 
 class Sphere:

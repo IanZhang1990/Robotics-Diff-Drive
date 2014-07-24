@@ -4,11 +4,13 @@ import sys, os, time
 import math, copy
 import random
 import Queue
+from datetime import datetime
 
 from geometry  import *
 from obstacles import *
 from utility   import *
 from priority_queue import *
+from pixel_reader   import *
 
 class Disc:
 	def __init__(self, center, radius):
@@ -175,6 +177,7 @@ class UMAPRMSampler:
 	def __init__(self, world):
 		self.world = world;
 		self.obstMgr = self.world.obstMgr;
+		self.MASamples = [];
 
 	def nearPoint(self, pnt):
 		searcher = LineSearch(None, None, 0, self.obstMgr, self.world);
@@ -187,14 +190,15 @@ class UMAPRMSampler:
 		near, dist = self.nearPoint( pnt );
 		return dist;
 
-	def k_nearest( self, pointset, point, radius ):
+	def k_nearest( self, totalpnts, pointset, point, radius ):
 		'''Get k-nearest points in the point set to a givin point. k is determined by radius'''
+	        rho = float(totalpnts) / (self.world.WIDTH*self.world.HEIGHT);
 	        pq = PriorityQueue();
         	for pnt in pointset:
         		dist = (pnt-point).r();
         		pq.push( pnt, dist );
 
-      		k = radius**2 / 50;
+      		k = math.pi*((radius*1.3 )**2) * rho;
       		if k > len(pointset):
       			return pointset;
         	k_near = [];
@@ -206,7 +210,7 @@ class UMAPRMSampler:
 	def sampleMAr(self, n, surf = None):
 		'''randomly generate points in c-space and sample on medial axis'''
 		pntset = [];
-		while len(pntset) < n:
+		while i in range(0,n):
 			#progressBar( float(len(pntset)) / n * 100);
 			rand_x = random.randint( 0, self.world.WIDTH );
 			rand_y = random.randint( 0, self.world.HEIGHT);
@@ -375,7 +379,7 @@ class UMAPRMSampler:
 	def sampleMAbk(self, n, surf = None):
 		'''randomly sample disc on MA, and sample on the boundary of existing discs'''
 		pntset = [];
-		while len(pntset) < n:
+		for i in range(0, n):
 			#progressBar( float(len(pntset)) / n * 100);
 			rand_x = random.randint( 0, self.world.WIDTH );
 			rand_y = random.randint( 0, self.world.HEIGHT);
@@ -416,6 +420,7 @@ class UMAPRMSampler:
 				maSamples.append( newDisc );
 				#pntset.remove( point );
 
+		self.MASamples = copy.copy(maSamples);
 		########
 		## Deal with points left outside any existing discs.
 		#----- Don't do anything for now.
@@ -432,14 +437,13 @@ class UMAPRMSampler:
 			#pntset = [];
 			for disc in maSamples:
 				if not disc.isClosed():
-					knear = self.k_nearest(pntset, disc.center, disc.radius);
+					knear = self.k_nearest(n, pntset, disc.center, disc.radius);
 					disc.samples += knear;
 					bndpntset += disc.getbndpoints();
 					if roundIdx == 1:
 						disc.render( surf);
-						self.refreshPygame(0.1);
+						self.refreshPygame(0);
 
-			print len(bndpntset);
 			for bndpnt in bndpntset:
 				good = True;
 				for disc in maSamples:
@@ -454,8 +458,8 @@ class UMAPRMSampler:
 				if dist2obst >= 10:
 					newDisc = Disc(bndpnt, dist2obst);
 					maSamples.append( newDisc );
-					newAdded += 1;
-					pygame.draw.circle( surf, (0,0,200), (int(bndpnt.x), int(bndpnt.y)), int(dist2obst), 1);
+					newAdded += 1; 
+					pygame.draw.circle( surf, (0,0,200), (int(bndpnt.x), int(bndpnt.y)), int(dist2obst)); ######################## Boundary Discs
 					self.refreshPygame();
 
 			if newAdded == 0:
@@ -516,27 +520,46 @@ gameWorld = World( WIDTH, HEIGHT, obsts );
 print "Initializing sampler..."
 sampler = UMAPRMSampler(gameWorld);
 
+datafile2write = open( 'imgs/MAk_coverage/data.txt', 'w' );
+infostr = '';
+
 ##################################################
 #####           Render the world
 ##################################################
-for i in range( 1, 31 ):
-	DISPLAYSURF = pygame.display.set_mode((WIDTH, HEIGHT));
-	DISPLAYSURF.fill((255,255,255));
-	for event in pygame.event.get():
-    		if event.type == QUIT:
-        		pygame.quit()
-        		sys.exit()
-	gameWorld.render( DISPLAYSURF );
+for i in range( 1, 61 ):
+	for j in range(1, 41):
+		DISPLAYSURF = pygame.display.set_mode((WIDTH, HEIGHT));
+		DISPLAYSURF.fill((255,255,255));
+		for event in pygame.event.get():
+    			if event.type == QUIT:
+        			pygame.quit();
+        			sys.exit();
+        	pygame.display.update();
+		gameWorld.render( DISPLAYSURF );
+
+		num = 100*i;
+		print '=================================='
+		print num;
+		timestr = time.strftime('%a-%d-%b-%Y-%H:%M:%S')
+		namestr = "imgs/MAk_coverage/" + timestr + '||' + str(num) + '||';
+		starttime = datetime.now()
+		samples = sampler.sampleMAbk( num, DISPLAYSURF );
+		endtime = datetime.now()
+		print "time cost: {0} microseconds".format(((endtime - starttime).microseconds)/float(10));
+		namestr += str(len(samples)) + '.PNG'
+		#pygame.image.save( DISPLAYSURF, namestr );
 
 
-	num = 400*i;
-	print '=================================='
-	print num;
-	timestr = time.strftime('%a-%d-%b-%Y-%H:%M:%S')
-	namestr = "imgs/MAr/" + timestr + '||' + str(num) + '||';
-	samples = sampler.sampleMAr( num, DISPLAYSURF );
-	namestr += str(len(samples)) + '.PNG'
-	pygame.image.save( DISPLAYSURF, namestr );
+		# Collect pixel info for analysis
+		infostr += "{0}\t{1}\t{2}\t".format( timestr, num, str(len(samples)) );
+		pixelreader = PixelReader( DISPLAYSURF );
+		coverage = float(pixelreader.count( (255, 255, 255) ));
+		print 'Coverage:\t{0}'.format(coverage);
+		infostr += str(coverage) +'%\t{0}\n'.format( ((endtime - starttime).microseconds)/float(1000));
+		#DISPLAYSURF = None;
 
+
+datafile2write.write( infostr );
+datafile2write.close();
 
 #=========================================================================================
