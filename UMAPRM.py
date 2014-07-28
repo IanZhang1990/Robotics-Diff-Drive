@@ -520,14 +520,15 @@ gameWorld = World( WIDTH, HEIGHT, obsts );
 print "Initializing sampler..."
 sampler = UMAPRMSampler(gameWorld);
 
-datafile2write = open( 'imgs/MAk_coverage/data.txt', 'w' );
-infostr = '';
-
 ##################################################
 #####           Render the world
 ##################################################
-for i in range( 1, 61 ):
-	for j in range(1, 41):
+filename = 'imgs/MAk_coverage/data_2.txt';
+datafile2write = open( filename, 'w' );
+
+for i in range( 1, 24 ):
+	for j in range(1, 11):		
+		infostr = '';
 		DISPLAYSURF = pygame.display.set_mode((WIDTH, HEIGHT));
 		DISPLAYSURF.fill((255,255,255));
 		for event in pygame.event.get():
@@ -537,7 +538,7 @@ for i in range( 1, 61 ):
         	pygame.display.update();
 		gameWorld.render( DISPLAYSURF );
 
-		num = 100*i;
+		num = 800 + 200*i;
 		print '=================================='
 		print num;
 		timestr = time.strftime('%a-%d-%b-%Y-%H:%M:%S')
@@ -545,21 +546,24 @@ for i in range( 1, 61 ):
 		starttime = datetime.now()
 		samples = sampler.sampleMAbk( num, DISPLAYSURF );
 		endtime = datetime.now()
-		print "time cost: {0} microseconds".format(((endtime - starttime).microseconds)/float(10));
+		print "time cost: {0} microseconds".format(((endtime - starttime).microseconds)/float(1000));
 		namestr += str(len(samples)) + '.PNG'
 		#pygame.image.save( DISPLAYSURF, namestr );
 
 
 		# Collect pixel info for analysis
-		infostr += "{0}\t{1}\t{2}\t".format( timestr, num, str(len(samples)) );
-		pixelreader = PixelReader( DISPLAYSURF );
+		#infostr += "{0}\t{1}\t{2}\t".format( timestr, num, str(len(samples)) );
+		pixelreader = PixelReader( DISPLAYSURF, gameWorld );
 		coverage = float(pixelreader.count( (255, 255, 255) ));
-		print 'Coverage:\t{0}'.format(coverage);
-		infostr += str(coverage) +'%\t{0}\n'.format( ((endtime - starttime).microseconds)/float(1000));
+		print "White Pixels: {0}".format(coverage);
+		infostr += str(coverage) +'\t{0}\n'.format( ((endtime - starttime).microseconds)/float(1000));
 		#DISPLAYSURF = None;
 
+		for record in pixelreader.records:
+			infostr += "{0}\t{1}\t{2}\t{3}\t{4}\n".format( num, str(len(samples)), record[0].x, record[0].y, record[1] );
 
-datafile2write.write( infostr );
+		datafile2write.write( infostr );
+		
 datafile2write.close();
 
 #=========================================================================================

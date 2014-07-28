@@ -1,10 +1,20 @@
 import sys, os
 import random
+import time
 from robot import *
 from obstacles import *
 from geometry import *
 from sampling import CoordMapping
 from space_partition import *
+
+def display_update(t=0.0):
+	for event in pygame.event.get():
+		if event.type == pygame.QUIT:
+			pygame.quit();
+			sys.exit();
+
+	pygame.display.update();
+	time.sleep(t);
 
 class LineSearch:
 	def __init__( self, start, dir, length, obstMgr, robot, mapper ):
@@ -48,9 +58,9 @@ class LineSearch:
 		timeclearance = self.obstMgr.time2obsts( self.robot );
 		return timeclearance;
 
-	def search(self):
+	def search(self, surface=None):
 		'''search for the point in the medial axis'''
-		#print "\n=====================\nsearching..."
+		print "\n=====================\nsearching..."
 		t = 1;
 		last_increse = False;
 		last_dist = self.dist2Obst(self.start);
@@ -58,6 +68,9 @@ class LineSearch:
 			temp = self.start + self.dir*t;
 			this_dist = self.dist2Obst(temp);
 			this_increase = ((this_dist-last_dist)>0);
+			if surface is not None:
+				self.robot.render(surface);
+				display_update(0.2);
 			#print this_dist;
 			if this_dist == 0.0:
 				return None, None;
@@ -66,6 +79,9 @@ class LineSearch:
 				config  = self.mapper.unmap(config_);
 				self.robot.setConfig(config);
 				if not self.obstMgr.intersects(self.robot):
+					if surface is not None:
+						self.robot.render(surface, (255,0,0));
+						display_update(0.2);
 					return temp, this_dist;
 				else:
 					return None, None;
@@ -191,7 +207,7 @@ class SamplerV2:
 				self.partition.addSphere( sphere );
 
 
-	def __sampleMA__(self, pntset, rho = None ):
+	def __sampleMA__(self, pntset, surface=None, rho=None ):
 		'''Sample spheres centered on Medial Axis in c-space.
 		@param pntset: A set of random points in free space. Coordinates are mapped.
 		@param rho   : number of points per unit volume.    '''
@@ -217,7 +233,7 @@ class SamplerV2:
 				dir_x = dir_y = dir_z = 50;
 			rand_dir = v3(dir_x, dir_y, dir_z);
 			line_searcher = LineSearch( point, rand_dir, l, self.obstMgr, self.robot, self.mapper );
-			maSample = line_searcher.search();
+			maSample = line_searcher.search(surface);
 			if maSample[0] is not None and maSample[1] >= 0.01:
 				config_ = Config( v2(maSample[0].x, maSample[0].y), maSample[0].z );
 				config  = self.mapper.unmap(config_);
@@ -227,7 +243,7 @@ class SamplerV2:
 
 		return self.maSamples;
 
-	def sample(self, n):
+	def sample(self, n, surface=None):
 		'''Sample spheres in c-space
 		@param n: (int) number of random points in free space'''
 		pntset = [];
@@ -245,7 +261,7 @@ class SamplerV2:
 
 		spaceSize = self.mapper.scaledSpaceSize();
 		rho = float(n)/float( spaceSize[0]*spaceSize[1]*spaceSize[2] );
-		self.__sampleMA__(pntset);
+		self.__sampleMA__(pntset, surface);
 
 		self.samples += self.maSamples;
 

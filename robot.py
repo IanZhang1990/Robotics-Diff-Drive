@@ -65,12 +65,15 @@ class DiffDriveRobot:
 		self.config = config;
 		return self.getLine();
 
-	def render( self, surf ):
+	def render( self, surf, color_=None ):
 		'''Render the differential drive to the screen'''
 		if self.collision == False:
 			color = (80, 255, 80);
 		else:
 			color = (255,0,0);
+
+		if color_ is not None:
+			color = color_;
 
 		line = self.getLine();
 		line.render( surf, color, 5 );

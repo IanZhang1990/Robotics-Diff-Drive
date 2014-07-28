@@ -58,7 +58,8 @@ for event in pygame.event.get():
         pygame.quit()
         sys.exit()
 gameWorld.render( DISPLAYSURF );
-pygame.image.save( DISPLAYSURF, 'world.PNG' );
+pygame.display.update();
+#pygame.image.save( DISPLAYSURF, 'world.PNG' );
 
 
 '''
@@ -93,7 +94,6 @@ pygame.quit();
 
 
 sampler = SamplerV2( gameWorld );
-
-sampler.sample(2000);
+sampler.sample(2000, DISPLAYSURF);
 #sampler.sampleSlice( math.pi/4 );
 sampler.save_data('spheres_complete.txt');
