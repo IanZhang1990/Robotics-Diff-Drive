@@ -28,7 +28,7 @@ class PixelReader:
 				dist = float(height - point.y);
 		return dist;
 
-	def count(self, color):
+	def count(self, color, discs):
 		'''Count the number of pixels with the give color'''
 		counter = 0;
 		for x in range( 1, self.width ):
@@ -39,7 +39,8 @@ class PixelReader:
 				 	near, dist = self.obstMgr.closest_point(v2(x,y));
 				 	if dist < 0:
 				 		continue;
-
+				 	if self.insideDisc( x, y, discs ):
+				 		continue;
 				 	dist2wall = self.dist2wall( v2(x,y), self.width, self.height );
 				 	counter += 1;					
 					self.records.append((v2(x,y), min(dist, dist2wall)));
@@ -47,3 +48,9 @@ class PixelReader:
 				pass;
 			pass;
 		return float(counter);
+
+	def insideDisc(self, x, y, discs):
+		for disc in discs:
+			if disc.inside( v2(x,y) ):
+				return True;
+		return False;

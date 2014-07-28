@@ -523,11 +523,11 @@ sampler = UMAPRMSampler(gameWorld);
 ##################################################
 #####           Render the world
 ##################################################
-filename = 'imgs/MAk_coverage/data_2.txt';
+filename = 'imgs/MAk_coverage/data_3.txt';
 datafile2write = open( filename, 'w' );
 
 for i in range( 1, 24 ):
-	for j in range(1, 11):		
+	for j in range(1, 4):		
 		infostr = '';
 		DISPLAYSURF = pygame.display.set_mode((WIDTH, HEIGHT));
 		DISPLAYSURF.fill((255,255,255));
@@ -538,7 +538,7 @@ for i in range( 1, 24 ):
         	pygame.display.update();
 		gameWorld.render( DISPLAYSURF );
 
-		num = 800 + 200*i;
+		num = 200*i;
 		print '=================================='
 		print num;
 		timestr = time.strftime('%a-%d-%b-%Y-%H:%M:%S')
@@ -554,9 +554,9 @@ for i in range( 1, 24 ):
 		# Collect pixel info for analysis
 		#infostr += "{0}\t{1}\t{2}\t".format( timestr, num, str(len(samples)) );
 		pixelreader = PixelReader( DISPLAYSURF, gameWorld );
-		coverage = float(pixelreader.count( (255, 255, 255) ));
+		coverage = float(pixelreader.count( (255, 255, 255), samples ));
 		print "White Pixels: {0}".format(coverage);
-		infostr += str(coverage) +'\t{0}\n'.format( ((endtime - starttime).microseconds)/float(1000));
+		#infostr += str(coverage) +'\t{0}\n'.format( ((endtime - starttime).microseconds)/float(1000));
 		#DISPLAYSURF = None;
 
 		for record in pixelreader.records:

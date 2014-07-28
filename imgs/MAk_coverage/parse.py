@@ -5,13 +5,13 @@ import math
 
 def parse(filename):
 
-	file2write= open( 'analysis.txt', 'w' );
+	file2write= open( 'analysis2.txt', 'w' );
 
 	file2read = open( filename, 'r' );
 	lineNum   = 0;
 	info_dict = dict();
-	last_num  = 1000;
-	counter = [0]*200;
+	last_num  = 200;
+	counter = [0]*300;
 	for line in file2read:
 		info = line.split( '\t' );
 		if len(info) < 3:
@@ -44,4 +44,4 @@ def parse(filename):
 	return;
 
 if __name__ == "__main__":
-	parse( "data_2.txt" );
+	parse( "data_3.txt" );
