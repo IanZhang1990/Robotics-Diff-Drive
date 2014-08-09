@@ -526,8 +526,8 @@ sampler = UMAPRMSampler(gameWorld);
 filename = 'imgs/MAk_coverage/data_3.txt';
 datafile2write = open( filename, 'w' );
 
-for i in range( 1, 24 ):
-	for j in range(1, 4):		
+for i in range( 1, 36 ):
+	for j in range(1, 6):		
 		infostr = '';
 		DISPLAYSURF = pygame.display.set_mode((WIDTH, HEIGHT));
 		DISPLAYSURF.fill((255,255,255));
