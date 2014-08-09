@@ -39,7 +39,22 @@ class PriorityQueue:
 		for priority, count, task in self.mPriQue:
 			if task is not self.mREMOVED:
 				tasks.append( task );
-		return tasks;		
+		return tasks;
+
+	def get_smalls(self, prior):
+		'''get all tasks with the same priority( larger than prior )'''
+		tasks = [];
+		prev_prio = 0;
+		first = True;
+		for priority, count, task in self.mPriQue:
+			if task is not self.mREMOVED:
+				if first and priority >= prior:
+					prev_prio = priority;
+					first = False;
+
+				if priority == prev_prio:
+					tasks.append( task );
+					prev_prio = priority;
 
 	def isEmpty(self):
 		return len(self.mPriQue) == 0;

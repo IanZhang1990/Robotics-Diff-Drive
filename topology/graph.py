@@ -1,5 +1,7 @@
 import sys, os, math
 
+from priority_queue import *
+
 class Node:
 	def __init__(self, name, group, value = 0):
 		self.name  = name;
@@ -149,7 +151,7 @@ class Graph:
 		return self.num_of_loops() == 0;
 
 	def mergeable_with(self, other):
-		'''define two graph to be mergable, if
+		'''define two graph to be mergable, if they satisfy both
 		1. they share some nodes
 		2. the new graph is loop free
 		'''
@@ -299,6 +301,53 @@ class GraphBreaker(object):
 		'''break the graph into several parts, and save them to another non-connected graph'''
 		graphs = [];
 		self_edges = self.origin_graph.get_all_edges();
+
+
+	def merge_graphs(self, graphs):
+		pq = PriorityQueue();
+		for graph in graphs:
+			pq.push( graph, graph.size() );
+
+		while not pq.isEmpty():
+			smallest_graph = pq.pop();
+			choices = [];
+			max_size = 1000;
+
+			small_size_graphs = pq.get_smalls( smallest_graph.size() ); # Choose all graphs such that 
+																		# 1. they have priority no less than current one, and 
+																		# 2. when merge with the smallest one they get a same size new graph
+			for graph in small_size_graphs:
+				if smallest_graph.mergeable_with( graph ):		# test if they are mergeable
+					choices.append( graph );
+
+			if len(graph) == 0:									# if no mergeable graph with the smallest one
+				continue;
+
+			# Now we have all graphs mergeable with the smallest graph that will produce the same sized new graph
+			''' naive strategy
+			graphs.remove(smallest);
+			graphs.remove( choices[0] );
+			pq.remove_task( choices[0] );
+			smallest_graph.self_merge_with( choices[0] );
+			graphs.append( smallest_graph );
+			pq.push( smallest_graph, smallest_graph.size() );
+			'''
+
+			'''better strategy:
+			--------------------------------------------------------------------------
+			define 'credit' for a list of graphs as:
+			The sum of the number of all mergeable graphs for every graph in the list
+			--------------------------------------------------------------------------
+			Merging two graphs means decreasing the credit by at least two.
+			With more credits, we can merge more graphs in the list.
+			So we prefer to merge graphs that results in larger credit. 
+			(Or, we prefer to merge graphs that decrease credit least.)
+			'''
+			
+
+
+
+
 
 
 graph = Graph();
