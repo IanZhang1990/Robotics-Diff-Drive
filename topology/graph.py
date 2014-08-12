@@ -11,6 +11,9 @@ class Node:
 #	def __eq__( self, other ):
 #		return self.name == other.name and self.value == other.value;
 
+	def same_name_with( self, other ):
+		return self.name == other.name;
+
 class Graph:
 	def __init__(self):
 		self.graphdict = dict();
@@ -155,6 +158,8 @@ class Graph:
 		1. they share some nodes
 		2. the new graph is loop free
 		'''
+		if self == other:
+			return False;
 		share_nodes = self.share_nodes_with( other );
 		if not share_nodes:
 			return False;
@@ -162,12 +167,33 @@ class Graph:
 		new_graph_loop_free = merged_graph.loop_free();
 		return share_nodes and new_graph_loop_free;
 
+	def strong_mergeable_with(self, other):
+		'''define two graph to be strong mergable, if they satisfy all
+		1. they share some nodes
+		2. the new graph is loop free
+		3. no nodes have neighbors more than 2.
+		'''
+		if self == other:
+			return False;
+		share_nodes = self.share_nodes_with( other );
+		if not share_nodes:
+			return False;
+		merged_graph = self.merge_with( other );
+		new_graph_loop_free = merged_graph.loop_free();
 
+		nodes = merged_graph.get_all_nodes();
+		for node in nodes:
+			if len(merged_graph.get_edges_of( node )) > 2:
+				return False;
+
+		return share_nodes and new_graph_loop_free;
+
+	'''
 	def self_merge_with(self, other):
-		'''merge the other graph with self. do not return a new graph. self is changed'''
+		''merge the other graph with self. do not return a new graph. self is changed''
 		otheredges = other.get_all_edges();
 		self.add_edges( otheredges );
-		return;
+		return;'''
 
 	def merge_with( self, other ):
 		'''Merge with another graph. return a new graph, while self remain unchanged'''
@@ -302,36 +328,57 @@ class GraphBreaker(object):
 		graphs = [];
 		self_edges = self.origin_graph.get_all_edges();
 
+		for edge in self_edges:
+			graph = Graph();
+			graph.add_edges( edge );
+			graphs.append( graph );
+
+		return self.merge_graphs( graphs );
+
 
 	def merge_graphs(self, graphs):
 		pq = PriorityQueue();
 		for graph in graphs:
 			pq.push( graph, graph.size() );
-
-		while not pq.isEmpty():
+		
+		visited = [];
+		while pq.size() > 1:
+			this_time_popped = [];
 			smallest_graph = pq.pop();
-			choices = [];
-			max_size = 1000;
+			this_time_popped.append(smallest_graph);
+			while (smallest_graph in visited) and (not pq.isEmpty()):
+				smallest_graph = pq.pop();
+				this_time_popped.append( smallest_graph );
+			visited.append( smallest_graph );
+			for popped in this_time_popped:
+				if popped not in visited:
+					pq.push( popped, popped.size() );
 
-			small_size_graphs = pq.get_smalls( smallest_graph.size() ); # Choose all graphs such that 
+			choices = [];
+
+			small_size_graphs = pq.get_all();
+			#small_size_graphs = pq.get_smalls( smallest_graph.size() ); # Choose all graphs such that 
 																		# 1. they have priority no less than current one, and 
 																		# 2. when merge with the smallest one they get a same size new graph
 			for graph in small_size_graphs:
-				if smallest_graph.mergeable_with( graph ):		# test if they are mergeable
+				if smallest_graph.strong_mergeable_with( graph ):		# test if they are mergeable
 					choices.append( graph );
 
-			if len(graph) == 0:									# if no mergeable graph with the smallest one
+			if len(choices) == 0:									# if no mergeable graph with the smallest one
+				pq.push( smallest_graph, smallest_graph.size() );
 				continue;
 
 			# Now we have all graphs mergeable with the smallest graph that will produce the same sized new graph
-			''' naive strategy
-			graphs.remove(smallest);
+			''' naive strategy'''
+			print '--------------'
+			print len(graphs), pq.size();
+			graphs.remove(smallest_graph);
 			graphs.remove( choices[0] );
 			pq.remove_task( choices[0] );
-			smallest_graph.self_merge_with( choices[0] );
-			graphs.append( smallest_graph );
-			pq.push( smallest_graph, smallest_graph.size() );
-			'''
+			merged_graph = smallest_graph.merge_with( choices[0] );
+			graphs.append( merged_graph );
+			pq.push( merged_graph, merged_graph.size() );
+			print len(graphs), pq.size();
 
 			'''better strategy:
 			--------------------------------------------------------------------------
@@ -344,9 +391,38 @@ class GraphBreaker(object):
 			(Or, we prefer to merge graphs that decrease credit least.)
 			'''
 			
+		#################
+		### 'graphs' is a list of loop-free graphs. Each cannot merge with another.
+		print len(graphs)
+		composed_graph = self.compose( graphs );
+		return composed_graph; 
 
+	def compose(self, graphs):
+		'''graphs are a list of graphs that each share some nodes. 
+		We need to compose them into one graph, to be shown in a webpage.
+		All nodes remain the same name, but are different now.'''
+		def find_same_name( nodes, node ):
+			'''Find a node in a list that has the same name with the 'node' '''
+			for item in nodes:
+				if item.same_name_with( node ):
+					return item;
 
+		new_graph = Graph();
 
+		for graph in graphs:
+			nodes = graph.get_all_nodes();
+			new_nodes = [];
+			for node in nodes:
+				new_nodes.append( Node(node.name, node.group, node.value));
+			edges = graph.get_all_edges();
+			new_edges = [];
+			for edge in edges:
+				corr_node1 = find_same_name( new_nodes, edge[0] );
+				corr_node2 = find_same_name( new_nodes, edge[1] );
+				new_edges.append( ( corr_node1, corr_node2, edge[2] ) );
+			new_graph.add_edges( new_edges );
+			
+		return new_graph;	
 
 
 
@@ -364,9 +440,20 @@ matrix2= [ [0,1,0,0,0,1],
 		   [0,0,1,0,1,0],
 		   [0,1,0,1,0,1],
 		   [1,0,0,0,1,0] ]
-graph.loadMat( matrix2 );
-print graph.num_of_loops();
-graph.saveJson("./graph_drawing/data/graph2.json");
-print len(graph.get_all_edges());
 
+matrix3 = [ [0,1,0,0,0,0,0,1,1,0],
+		    [1,0,1,0,0,0,0,0,1,0],
+		    [0,1,0,1,0,0,0,0,1,0],
+		    [0,0,1,0,1,0,0,0,1,0],
+		    [0,0,0,1,0,1,0,0,0,1],
+		    [0,0,0,0,1,0,1,0,0,1],
+		    [0,0,0,0,0,1,0,1,0,1],
+		    [1,0,0,0,0,0,1,0,0,1],
+		    [1,1,1,1,0,0,0,0,0,1],
+		    [0,0,0,0,1,1,1,1,1,0] ]
+graph.loadMat( matrix3);
+graph.saveJson('./graph_drawing/data/graph2.json');
 
+graphBreaker = GraphBreaker(graph);
+breaked_graph = graphBreaker.break_it();
+breaked_graph.saveJson('./graph_drawing/data/broken_graph.json');

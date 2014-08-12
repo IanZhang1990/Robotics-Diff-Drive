@@ -56,8 +56,13 @@ class PriorityQueue:
 					tasks.append( task );
 					prev_prio = priority;
 
+		return tasks;
+
 	def isEmpty(self):
 		return len(self.mPriQue) == 0;
+
+	def size(self):
+		return len(self.mPriQue);
 
 '''
 pq = PriorityQueue()
