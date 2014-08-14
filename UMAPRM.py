@@ -71,7 +71,7 @@ class Disc:
 		if surf is None:
 			return;
 
-		pygame.draw.circle( surf, color, (int(self.center.x), int(self.center.y)), int(self.radius) )
+		pygame.draw.circle( surf, color, (int(self.center.x), int(self.center.y)), int(self.radius), 1 )
 		
 		if mode == 2:
 			for point in self.samples:
@@ -178,6 +178,19 @@ class UMAPRMSampler:
 		self.world = world;
 		self.obstMgr = self.world.obstMgr;
 		self.MASamples = [];
+
+	def save_data( self, samples, filename ):
+		'''Save sampled spheres. Write data to a file'''
+		file2write = open( filename, 'w' );
+		formattedData = "";
+		for sphere in samples:
+			formattedData += str( sphere.center[0] ) + "\t";
+			formattedData += str( sphere.center[1] ) + "\t";
+			formattedData += str( sphere.radius);
+			formattedData += "\n";
+
+		file2write.write( formattedData );
+		file2write.close();
 
 	def nearPoint(self, pnt):
 		searcher = LineSearch(None, None, 0, self.obstMgr, self.world);
@@ -377,7 +390,7 @@ class UMAPRMSampler:
 		return maSamples;
 
 	def sampleMAbk(self, n, surf = None):
-		'''randomly sample disc on MA, and sample on the boundary of existing discs'''
+		'''randomly sample disc on MA, and sample on the boundary of existing discs with k-nearest'''
 		pntset = [];
 		for i in range(0, n):
 			#progressBar( float(len(pntset)) / n * 100);
@@ -421,6 +434,8 @@ class UMAPRMSampler:
 				#pntset.remove( point );
 
 		self.MASamples = copy.copy(maSamples);
+		print len(maSamples);
+		
 		########
 		## Deal with points left outside any existing discs.
 		#----- Don't do anything for now.
@@ -441,7 +456,7 @@ class UMAPRMSampler:
 					disc.samples += knear;
 					bndpntset += disc.getbndpoints();
 					if roundIdx == 1:
-						disc.render( surf);
+						disc.render( surf, 2 );
 						self.refreshPygame(0);
 
 			for bndpnt in bndpntset:
@@ -459,7 +474,7 @@ class UMAPRMSampler:
 					newDisc = Disc(bndpnt, dist2obst);
 					maSamples.append( newDisc );
 					newAdded += 1; 
-					pygame.draw.circle( surf, (0,0,200), (int(bndpnt.x), int(bndpnt.y)), int(dist2obst)); ######################## Boundary Discs
+					pygame.draw.circle( surf, (0,0,200), (int(bndpnt.x), int(bndpnt.y)), int(dist2obst), 1); ######################## Boundary Discs
 					self.refreshPygame();
 
 			if newAdded == 0:
@@ -519,12 +534,34 @@ gameWorld = World( WIDTH, HEIGHT, obsts );
 
 print "Initializing sampler..."
 sampler = UMAPRMSampler(gameWorld);
+print "Finish initializing...."
 
 ##################################################
-#####           Render the world
+#####           Sample the space
+##################################################
+DISPLAYSURF = pygame.display.set_mode((WIDTH, HEIGHT));
+DISPLAYSURF.fill((255,255,255));
+for event in pygame.event.get():
+	if event.type == QUIT:
+		pygame.quit();
+pygame.display.update();
+gameWorld.render( DISPLAYSURF );
+
+print "Start sampling"
+samples = sampler.sampleMAbk( 6000, DISPLAYSURF );
+sampler.save_data( samples, "./topology/balls.txt" )
+
+print "FINISHED!!!!"
+sys.exit();
+
+
+##################################################
+#####           Sample many times
 ##################################################
 filename = 'imgs/MAk_coverage/data_3.txt';
 datafile2write = open( filename, 'w' );
+
+
 
 for i in range( 1, 36 ):
 	for j in range(1, 6):		
