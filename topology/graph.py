@@ -284,7 +284,7 @@ class Graph:
 		linkStr = "";
 		nodes = self.graphdict.keys();
 		for node in nodes:
-			nodeStr += "\t\t{\"name\":\"" + node.name + "\", \"group\":"+ str(node.group) +"},\n";
+			nodeStr += "\t\t{\"name\":\"" + str(node.name) + "\", \"group\":"+ str(node.group) +"},\n";
 			for edge in self.graphdict[node]:
 				linkStr += "\t\t{\"source\":"+ str(nodes.index(node)) +",\"target\":" + str(nodes.index(edge[0])) + ",\"value\":"+ str(edge[1]) +"},\n";
 
@@ -425,7 +425,7 @@ class GraphBreaker(object):
 		return new_graph;	
 
 
-
+'''
 graph = Graph();
 matrix = [ [0,1,0,1,1,0],
 		   [1,0,1,0,0,1],
@@ -457,3 +457,4 @@ graph.saveJson('./graph_drawing/data/graph2.json');
 graphBreaker = GraphBreaker(graph);
 breaked_graph = graphBreaker.break_it();
 breaked_graph.saveJson('./graph_drawing/data/broken_graph.json');
+'''

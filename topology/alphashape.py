@@ -1,24 +1,74 @@
 
-import sys, os, math;
+import sys, os, copy, math;
 import pygame;
 
 from triangulate import *;
 from geometry import *
-
+from graph import *
 
 
 class HypergraphNode:
 	def __init__(self):
 		self.triangles = [];
-		self.nodes     = [];
+		self.nodes     = [];    ## Spheres 
 
 	def addTriangle(self, triangle):
 		if triangle not in self.triangles:
 			self.triangles.append( triangle );
 
 	def addNode(self, node):
+		'''node must be a sphere'''
 		if node not in self.nodes:
 			self.nodes.append( node );
+
+	def getNodes(self):
+		if len(self.nodes) > 0 and len(self.triangles) == 0:
+			return self.nodes;
+		for tri in self.triangles:
+			spheres = tri.spheres;
+			for sphere in spheres:
+				if sphere not in self.nodes:
+					self.nodes.append( sphere );
+		return self.nodes;
+
+	def share_node_with(self, other):
+		self_nodes = self.getNodes();
+		for node in self_nodes:
+			if node in other.getNodes():
+				return True;
+		return False;
+
+	def copy(self):
+		newNode = HypergraphNode();
+		if len(self.triangles) == 0:
+			for node in self.nodes:
+				newNode.addNode( node );
+		for tri in self.triangles:
+			newNode.addTriangle(tri);
+		return newNode;
+
+
+	def merege_with( self, other ):
+		if self == other:
+			return None;
+		if self.share_node_with(other):
+			self_copy = self.copy();
+			for tri in other.triangles:
+				self_copy.addTriangle( tri );
+			return self_copy;
+		return None;
+
+	def has_edge( self, other, edges ):
+		self_balls  = self.getNodes();
+		other_balls = other.getNodes();
+		for ball in self_balls:
+			for other_ball in other_balls:
+				for edge in edges:
+					if (edge[0] == ball and edge[1] == other_ball) or (edge[1] == ball and edge[0] == other_ball):
+						return True;
+
+		return False; 
+
 
 def isEdgeValid( edge ):
 	'''edge = (ball1, ball2, weight)'''
@@ -58,19 +108,21 @@ def triangleFilter( triangles, alpha = 0.5, surf = None ):
 			edges.append( (ball1, ball2, 0) );
 			edges.append( (ball2, ball3, 0) );
 			edges.append( (ball1, ball3, 0) );
+			triangle.ifValid = True;
+		else:
+			triangle.ifValid = False;
+
+		triangle.ifValid = isTriangleValid( triangle );
 
 	return edges;
 
-def isTriangleValid( triangle, surface ):
+def isTriangleValid( triangle, surface = None ):
 	ball1 = triangle.spheres[0];
 	ball2 = triangle.spheres[1];
 	ball3 = triangle.spheres[2];
 	A = v2(ball1[0], ball1[1]);		r_a = ball1[2];
 	B = v2(ball2[0], ball2[1]);		r_b = ball2[2];
 	C = v2(ball3[0], ball3[1]);		r_c = ball3[2];
-
-	#if (A-B).r() > (r_a+r_b) or (A-C).r() > (r_a + r_c) or (B-C).r() > (r_b+r_c):
-	#	return False; 
 
 	# 1. First Radical Axis
 	l1 = (A-B).r();
@@ -99,7 +151,7 @@ def isTriangleValid( triangle, surface ):
 	inter_y = k1*( inter_x - mid1.x ) + mid1.y;
 	rad_center = v2( inter_x, inter_y );
 
-	pygame.draw.circle( surface, (255,0,255), (int(rad_center.x), int(rad_center.y)), 3 );
+	#pygame.draw.circle( surface, (255,0,255), (int(rad_center.x), int(rad_center.y)), 3 );
 
 
 	# Determine if the intersection is inside any spheres
@@ -173,20 +225,116 @@ def buildDualShape(spheres):
 		if not isEdgeValid(edge):
 			edges.remove( edge );
 	
+	finalTris = [];
+
 	for triangle in triangles:
 		edge1 = ( triangle.spheres[0], triangle.spheres[1], 0 );
 		edge2 = ( triangle.spheres[0], triangle.spheres[2], 0 );
 		edge3 = ( triangle.spheres[1], triangle.spheres[2], 0 );
-		if isEdgeValid( edge1 ):
+		edge1Valid = isEdgeValid( edge1 );
+		edge2Valid = isEdgeValid( edge2 );
+		edge3Valid = isEdgeValid( edge3 );
+		if edge1Valid:
 			edges.append( edge1 );
-		if isEdgeValid( edge2 ):
+		if edge2Valid:
 			edges.append( edge2 );
-		if isEdgeValid( edge3 ):
+		if edge3Valid:
 			edges.append( edge3 );
+		if edge1Valid and edge2Valid and edge3Valid:
+			triangle.render( DISPLAYSURF, 0 );
+			triangle.ifValid = True;
+			finalTris.append( triangle );
 	
 	for edge in edges:
 		pygame.draw.line( DISPLAYSURF, (0,0,200), ( int(edge[0][0]),int(edge[0][1]) ), ( int(edge[1][0]),int(edge[1][1]) ), 2 );
-	pygame.image.save( DISPLAYSURF, "AlphaShape.PNG" );	
+	
+
+	#########################################
+	#### 4. Start to build the simple graph
+	triangle_balls = [];
+	regular_balls = [];
+	for tri in finalTris:
+		balls = tri.spheres;
+		for ball in balls:
+			if ball not in triangle_balls:
+				triangle_balls.append( ball );
+	for ball in spheres:
+		if ball not in triangle_balls:
+			regular_balls.append( ball );
+
+	hypergraphNodes = [];
+	
+	for tri in finalTris:
+		node = HypergraphNode();
+		node.addTriangle( tri );
+		hypergraphNodes.append( node );
+
+	print len(hypergraphNodes);
+
+	gotNewMerge = True;
+	while gotNewMerge:	
+		gotNewMerge = False;
+		for node_i in hypergraphNodes:
+			if node_i not in hypergraphNodes:
+				continue;
+			#sprint "i\t{0}".format(node_i);
+			for node_j in hypergraphNodes:
+				if node_j not in hypergraphNodes:
+					continue;
+				merged = node_i.merege_with( node_j );
+				if merged is not None:
+					gotNewMerge = True;
+					#print "j\t{0}".format(node_j);
+					if node_j in hypergraphNodes:
+						hypergraphNodes.remove( node_j );
+					if node_i in hypergraphNodes:
+						hypergraphNodes.remove( node_i );
+					hypergraphNodes.append( merged );
+
+
+	print len( hypergraphNodes );
+
+	for ball in regular_balls:
+		node = HypergraphNode();
+		node.addNode( ball );
+		hypergraphNodes.append( node );
+
+	simple_graph_nodes = [];
+	i = 0;
+	for node in hypergraphNodes:
+		simple_graph_nodes.append( Node(i, i, node) );
+		i += 1;
+	
+
+	def find_simple_node( hypernode, simplenodes ):
+		for simp_node in simplenodes:
+			if simp_node.value == hypernode:
+				return simp_node;
+		return None;
+
+	simple_graph_edges = [];
+	for node_i in hypergraphNodes:
+		simp_node_i = find_simple_node( node_i, simple_graph_nodes );
+		for node_j in hypergraphNodes:
+			simp_node_j = find_simple_node( node_j, simple_graph_nodes );
+			if node_i.has_edge( node_j, edges ):
+				edge = ( simp_node_i, simp_node_j, 1 );
+				#pygame.draw.line(DISPLAYSURF, (255,0,0), (int(node_i.nodes[0][0]), int(node_i.nodes[0][1])), (int(node_j.nodes[0][0]), int(node_j.nodes[0][1])), 2 );
+				#pygame.display.update();
+				simple_graph_edges.append( edge );
+
+	graph = Graph();
+	graph.add_nodes( simple_graph_nodes );
+	graph.add_edges( simple_graph_edges );
+	graph.saveJson('./graph_drawing/data/graph2.json');
+	'''
+	graphBreaker = GraphBreaker(graph);
+	breaked_graph = graphBreaker.break_it();
+	breaked_graph.saveJson('./graph_drawing/data/broken_graph.json');
+	'''
+
+
+	pygame.image.save( DISPLAYSURF, "AlphaShape.PNG" );
 
 
 def load_data( filename):
