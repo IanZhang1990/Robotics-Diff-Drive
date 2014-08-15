@@ -25,24 +25,26 @@ Describing the  \ldots
 This is time for all good men to come to the aid of their party!
 
 \section{Related Work}\label{related work}
-In this section, we first discuss the basics of sampling-based motion planning and the method of sampling on medial axis. With the information of positions and their clearance in c-space, we have samples as spheres. We then discuss the dual shapes of the union of balls which plays an important role in understanding the shape of c-space and its topology. Some works on graph theory and topology will finally be introduced. 
 
-\begin{description}
-\item[A] \emph{Sampling-based Motion Planning} \hfill \\
+\indent\indent In this section, we first discuss the basics of sampling-based motion planning and the method of sampling on medial axis. With the information of positions and their clearance in c-space, we have samples as spheres. We then discuss the dual shapes of the union of balls which plays an important role in understanding the shape of c-space and its topology. Some works on graph theory and topology will finally be introduced. 
 
-\item[B] \emph{Medial Axis Sampling} \hfill \\
+\paragraph{A} \emph{Sampling-based Motion Planning} \hfill \\
+\indent A robot is a movable object whose state can be described by $n$ parameters, or \emph{degrees of freedom} ($DOFs$). A point $<x_1, x_2, ..., x_n>$ in a n-dimensional space uniquely defines the configuration of a robot. Such space is called \emph{"Configuration Space"} or \emph{"C-space"}  ($C$). The subset of all feasible configurations is called the \emph{free space} (\emph{$C_{free}$}), while $C_{obst} = C \setminus C_{free}$ is the union of all infeasible configurations. \cite{UMAPRM} Path planning will generally be viewed as a search in a metric space $X$ for a continuous path from an initial state $x_{init}$ to a goal region $X_{goal} \subset X$. For a standard problem, $X = C$. \cite{RRT}
 
-\item[C] \emph{Dual Shapes of Unions of Balls} \hfill\\
+\indent Sampling-based algorithms have been very successful and have seen many applications in industry for planning in high dimension space. Probablistic Roadmap \cite{PRM} and Rapidly-Exploring Random Tree \cite{RRT} are two outstanding methods. The basic idea under these methods is to randomly sample feasible configurations in $C-space$ and connect nearby valid samples as edges to construct a graph or tree structure, which careless about the dimension problem. By connecting start and goal configurations to the roadmap, a graph search, e.g., A*, can be performed to extract a near optimal solution path.
 
-\item[D] \emph{Betti Numbers} \hfill \\
+\paragraph{B} \emph{Medial Axis Sampling} \hfill \\
 
-\item[E] \emph{Homotopy Class} \hfill \\
+\paragraph{C} \emph{Dual Shapes of Unions of Balls} \hfill\\
 
-\end{description}
+\paragraph{D} \emph{Betti Numbers} \hfill \\
+
+\paragraph{E} \emph{Homotopy Class} \hfill \\
+
 
 \section{Our Method}\label{method}
 
-Traditionally, sampling based algorithms will build a graph for configuration space. These kind of graphs is proved to be able to find near optimal path, but can hardly be used to analysis the topology of paths. We want to to build a stronger represent of c-space that is both able to cover optimal path and study the topology structure of c-space. In this section, we are trying to answer the question of "are two paths in the same homotopy class". We will first give the outline of our algorithm, and introduce each phase step by step. 
+\indent \indent Traditionally, sampling based algorithms will build a graph for configuration space. These kind of graphs is proved to be able to find near optimal path, but can hardly be used to analysis the topology of paths. We want to to build a stronger represent of c-space that is both able to cover optimal path and study the topological structure of c-space. In this section, we are trying to answer the question of "are two paths in the same homotopy class". We will first give the outline of our algorithm, and introduce each phase step by step. 
 
 \begin{description}
 
@@ -65,6 +67,12 @@ We now describe the some experiments and their results.
 We worked hard, and achieved very little.
 
 \bibliographystyle{abbrv}
-\bibliography{main}
+\begin{thebibliography}{1}
+
+  \bibitem{UMAPRM} Yeh, Hsin-Yi Cindy, et al. "UMAPRM: Uniformly Sampling the Medial Axis."
+  \bibitem{RRT} LaValle, Steven M. "Rapidly-Exploring Random Trees A New Tool for Path Planning." (1998).
+  \bibitem{PRM} L. E. Kavraki, P. Svestka, L. E. K. P. Vestka, J. claude Latombe, and M. H. Overmars, “Probabilistic roadmaps for path planning in high-dimensional configuration spaces,” IEEE Trans. Robot. Autom., vol. 12, pp. 566–580, 1996.
+
+\end{thebibliography}
 
 \end{document}
