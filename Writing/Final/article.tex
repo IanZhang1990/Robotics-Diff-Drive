@@ -132,7 +132,11 @@ This is time for all good men to come to the aid of their party!
 \indent \indent Traditionally, sampling based algorithms will build a graph for configuration space. These kind of graphs are proved to be able to find near optimal path, but can hardly be used to analysis the topology of paths. We want to to build a stronger representation of c-space that is both able to cover optimal path and study the topological structure of c-space. In this section, we are trying to solve the problem in 2D and answer the question "Is two paths in the same homotopy class" as a start point of using our method to study the topology of \emph{C-space}. We will first give the outline of the algorithm, and explain each step in detail. 
 
 \paragraph{A} \emph{The Algorithm outline} \hfill \\
-\indent Before starting introducing our algorithm, we firstly clarify some preliminary tools we can have: 
+\indent Before starting introducing our algorithm, we firstly clarify some preliminary tools we can have: We are sampling in $(X, \rho)$ metric space. Let $x$ be a configuration in $X$(usually \emph{C-space}), $\rho(x)$ gives the clearance of configuration $x$. By \emph{"clearance"}, we mean its (estimated) distance to the nearest obstacles. Ball $B(x, \rho(x))$ is referred as a $"sample"$ in the rest of the section. We make no assumption of the shape of obstacles regions in \emph{C-space}. 
+
+\indent The algorithm is shown in Figure \ref{fig:Algo}. It has four phases. The first phase is to generate some random configurations in \emph{C-space}, like all other sampling-based planning algorithms do, and keep only those feasible ones. Every feasible configuration will be kept until the third phase. ($randomConfig$ keep unchanged.) In the second phase, we will sample balls centered on medial axis first and then try to cover the left area of $C_{free}$. Samples on the medial axis $MA(C_{free})$ will be used in phase three to construct the dual shape that captures the topology of $C_{free}$. After simplifying the dual shape, we will have a roadmap while maintaining the topological structure. Phase four break the topology roadmap into pieces such that no two piece can be merged without forming a loop. 
+
+\indent We will now explain each phase in detail.
 
 %%%%%%%%%%%%%%%%================================================>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 %%%%%%  We need to name our algorithm
@@ -140,30 +144,30 @@ This is time for all good men to come to the aid of their party!
 %---------------------------------------------------------------------------------------------
 \begin{figure}
   \begin{algorithmic}[1]
-  \Function{OurAlgorithm}{\emph{C-space}}
-    \State $pntset \gets$ randomly generated points in free space.
-    \State $maSamples \gets$ Empty Set.
-    \State $l \gets $ stick length.	 
-	\For{$point \in pntset$}
-		\State $dir \gets$ random direction  
-		\State $stick \gets$ ( point, l, dir ) \Comment{start point+length+direction=a stick}
-		\If{ $stick$ intersects with the medial axis }
-		
-			\indent\indent $sample \gets$ stick.search()
-			
-			\indent\indent $radius \gets$ clearance( sample ) \Comment{get the clearance at this point}
-			
-			\indent\indent $maSamples.append( ball(sample, radius) )$
-		\EndIf
-	\EndFor
+  \Function{WeNeedAGoodName}{\emph{C-space}}
+  
+    \indent \State $randomConfigs \gets SampleRandomConfigurations( \emph{C-space}, number )$ 
+    
+    \indent \State $maSamples \gets SampleOnMedialAxis( randomConfigs )$
+    \indent \State $regSamples \gets SampleLeftArea(maSamples, randomConfigs)$
+    
+    \indent \State $dualShape \gets WeightedAlphaShape( maSmaples )$
+    \indent \State $topologyRoadmap \gets Retract(dualShape)$ 
+    
+    \indent \State $brokenRoads \gets BreakGraph( topologyRoadmap )$
+    
+    \indent 
 	
-	\Return $maSamples$;
   \EndFunction
   \end{algorithmic}
-  \caption{Algorithm Outline}
+  \caption{\label{fig:Algo} Algorithm Outline}
 \end{figure}
 
 \paragraph{B} \emph{Sampling in C-space} \hfill \\
+\indent As pointed out in Figure \ref{fig:Algo}, this phase has two parts: Sampling on medial axis, and sampling the rest of free space. 
+
+\indent Sampling on medial axis is well studied in \cite{MAPRM} and \cite{UMAPRM}. Besides the positions of configurations, we also keep the clearance of each configuration, thus have some balls, or samples. We also require that no new ball, when sampling, is allowed to be centered inside any existing one. For details of the algorithms, please refer to these two papers. One thing worth our notice is that using only algorithm mentioned in \cite{MAPRM}, we can get good result in narrow corridor but are more likely to ignore large open area. While using only \cite{UMAPRM} method, we can cover large open area well, but more likely to produce disconnected balls in narrow corridor. Therefore, running both algorithm is highly recommended. 
+
 
 \paragraph{C} \emph{Constructing Topology Roadmap of C-space} \hfill \\
 
