@@ -550,7 +550,6 @@ gameWorld.render( DISPLAYSURF );
 print "Start sampling"
 samples = sampler.sampleMAbk( 6000, DISPLAYSURF );
 sampler.save_data( samples, "./topology/balls.txt" )
-
 print "FINISHED!!!!"
 sys.exit();
 

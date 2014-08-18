@@ -86,15 +86,21 @@ if __name__ == "__main__":
 	DISPLAYSURF.fill((255,255,255));
 	pygame.display.update();
 
+    
+	i = 0;
 	for sphere in spheres:
-		pygame.draw.circle( DISPLAYSURF, (200, 200, 200), (int(sphere[0]),int(sphere[1])), int(sphere[2]), 1 );
+		if i < 43:
+			pygame.draw.circle( DISPLAYSURF, (200, 200, 200), (int(sphere[0]),int(sphere[1])), int(sphere[2]), 2 );
+		else:
+			pygame.draw.circle( DISPLAYSURF, (0, 200, 0), (int(sphere[0]),int(sphere[1])), int(sphere[2]), 2 );
+		i += 1;
 
-	for tri in triangles:
-		tri.render( DISPLAYSURF );
+	#for tri in triangles:
+	#	tri.render( DISPLAYSURF );
 
 
 	for point in points:
 		pygame.draw.circle( DISPLAYSURF, (255, 0, 0), (int(point[0]),int(point[1])), 3 );
 
-	pygame.image.save( DISPLAYSURF, "Triangluation.PNG" );
+	pygame.image.save( DISPLAYSURF, "Samples.PNG" );
 
