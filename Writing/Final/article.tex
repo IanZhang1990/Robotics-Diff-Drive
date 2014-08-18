@@ -28,11 +28,21 @@
 \maketitle
 
 \begin{abstract}
-Covering both the configuration space and represent the right topology is hard to achieve at the same time with traditional sampling-based motion planning algorithms, such as Probabilistic Roadmap and Rapidly-Exploring Random Tree. In this paper, we proposed a method that is able to cover near optimal path and study the shape and topology of configuration space. 
+Covering both the configuration space, or \emph{C-space}, and represent the right topology is hard to achieve at the same time with traditional sampling-based motion planning algorithms, such as Probabilistic Roadmap and Rapidly-Exploring Random Tree. In this paper, we proposed a method that is able to cover near optimal path and study the shape and topology of configuration space. Our method samples a serious of balls to cover the space and use the dual shape of the union of balls to re-construct space. We analysis the coverage of the space and show how these balls and their dual shape can be used to generate a graph that maintains the topology of \emph{C-space} 
 \end{abstract}
 
 \section{Introduction}
-This is time for all good men to come to the aid of their party!
+\indent\indent Planning a collision-free motion for movable object could be very challenge, especially in high dimensional space, because of the lack of knowledge to understand the shape and top of configuration space. Meanwhile, motion planning has extensive applicationsto areas like augmented reality \cite{aug}, computer-aided design \cite{design} and bioinformatics \cite{bioinformatics}. More knowledge on \emph{C-space} will be benefit to these research.
+
+\indent Although we have seen some study in low dimensional space trying to characterize the topology of \emph{C-space} \cite{ConCompNum} \cite{interval}, these methods suffer dimension curse in high dimension space. 
+
+\indent Sampling-based method for motion planning appear to be very successful \cite{Book}. These methods are usually proved to be \emph{probabilistically complete}, thus guarantee to find a path if it exists. Medial Axis sampling \cite{MAPRM} \cite{UMAPRM} attracted researchers attention for their property of characterizing the topology of \emph{C-space} and safe clearance to obstacles, however, no structures are made of these samples to properly represent the space. 
+
+\indent Trying to answer the question "does a collision free path exist", Zoe McCarthy uses samples to build an $\alpha$-shape to better understand samples and space captured, which inspires us to explore more with $\alpha$-shape. 
+
+\indent Approximating the "shape" of a given point set in a space is a frequently occurred question in many research areas, which is the intuitive of $\alpha$-shape. A relative notion is space-filling diagram which is used in chemistry and biology to represent molecular structures. \cite{alpha intro}. 
+
+\indent In this paper, we will firstly introduce sampling algorithms to cover the \emph{C-space}, medial axis sampling methods are applied to reduce the number of samples and capture the topology of the space. We then use these samples, or balls, to construct the weighted $\alpha$-shape. After simplifying the $\alpha$-shape, we will still have a simple graph, which can be used for both motion planning and topology study. We at each step, we will demonstrate algorithm results of a 2D configuration space. Some properties of our algorithm are discussed in section 4. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %	Introducing Related Work
@@ -41,7 +51,7 @@ This is time for all good men to come to the aid of their party!
 
 \section{Related Work}\label{related work}
 
-\indent\indent In this section, we first discuss the basics of sampling-based motion planning and the method of sampling on medial axis. With the information of positions and their clearance in c-space, we have samples as spheres. We then discuss the dual shapes of the union of balls which plays an important role in understanding the shape of c-space and its topology. Some works on graph theory and topology will finally be introduced.
+\indent\indent In this section, we first discuss the basics of sampling-based motion planning and the method of sampling on medial axis. With the information of positions and their clearance in c-space, we have samples as spheres. We then discuss the dual shapes of the union of balls which plays an important role in understanding the shape of c-space and its topology. Some works on graph theory and topology will finally be introduced. 
 
 %====================================
 % Sampling Based Motion Planning
@@ -86,7 +96,7 @@ This is time for all good men to come to the aid of their party!
 %====================================
 
 \paragraph{C} \emph{Dual Shapes of Unions of Balls} \hfill\\
-\indent Approximating the shape of an unknown area to study its properties is a very commonly used method. We have seen many such ideas in the study of biogeometry. As for robotics, a few people began to notice the achievements from biogeometry study and tried to apply similar methods to study the shape of \emph{C-space}. 
+\indent Approximating the shape of an unknown area to study its properties is a very commonly used method. We have seen many such ideas in the study of biogeometry. As for robotics, a few people began to notice the achievements from biogeometry study and tried to apply similar methods to study the shape of \emph{C-space}. \cite{alpha intro} 
 
 \indent Zoe McCarthy \cite{PathNonexistance} used samples generated by PRM to form the $\alpha$-shape of \emph{C-space}. She then proved there doesn't exist a path between a pair of configurations by proving they are in two different disconnected components of the shape. She declared it was the first time $\alpha$-shape is being used in motion planning.
 
@@ -239,7 +249,7 @@ $\beta_1 = m - n + k$
 
 \indent In the first part, constructing the dual shape using only the medial axis sample could break the topology of medial axis. The reason is shown in Figure \ref{badthing}: three balls are all centered on medial axis, but their dual shape will be an empty triangle, which introduces a "hole" in that area. To solve this problem we can try to sample a ball centered at the the radical center after getting an empty triangle, and rebuild the dual shape for these four balls. \cite{radical center} Proving the solution is very simple: if there is no obstacles in that area, the newly sampled ball will cover the space, if there is obstacle, the ball will either not be sampled or not connect three of the balls.
 
-\indent With these balls, we then compute their dual shape, which is formed by some 1-simplices and 2-simplices in 2D. The runtime of computing dual shape will be $O(n^2)$ which is the worst case when doing regular triangulation of weighted points. Although using all balls will avoid problem as in Figure \ref{badthing}, we are making $n$ much larger, which results in a bad runtime of this step.  
+\indent With these balls, we then compute their dual shape, which is formed by some 1-simplices and 2-simplices in 2D. The runtime of computing dual shape will be $O(n^2)$ which is the worst case when doing regular triangulation of weighted points. Although using all balls will avoid problem as in Figure \ref{badthing}, we are making $n$ much larger, which results in a bad runtime of this step. (However, constructing the dual shape of all balls will be helpful to study the shape of \emph{C-space})
 
 \indent One might argue that we can simply get configurations on medial and connect them as a roadmap. However, this roadmap doesn't maintain the topology of \emph{C-space}. At some corners, we will still get triangles which don't have information if there are obstacles inside the triangle. By building the dual shape, this will no longer be a problem.
 
@@ -390,11 +400,21 @@ $\beta_1 = m - n + k$
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusions and Future Work}\label{conclusions}
-We worked hard, and achieved very little.
+\indent\indent The results demonstrated with our algorithm are sound for covering the \emph{C-space} and represent the topology.  
+
+\indent However, we don't know what kind of issues there will be when implementing for high dimensional space. The time cost for constructing weighted $\alpha$-shape( dual shape ) of unions of balls is a concern. Because we need to check each \emph{k-simplex} while $k = 1, 2, 3, ..., d$, $d$ being the dimensions. So, our next goal is to implement the algorithm for 3D case, and then higher dimensions.
+
+\indent Our next direction is to study the properties and applications of weighted $\alpha$-shape, especially applications in bioinformatics and chemistry, then extend to high dimensions.
+
+\indent Another direction will be studying the topology using the topology roadmap we constructed. Its value is underestimated in this paper, and I believe we can find more there.
 
 \bibliographystyle{abbrv}
 \begin{thebibliography}{1}
-
+  \bibitem{aug} J.-M. Lien, O. B. Bayazit, R.-T. Sowell, S. Rodriguez, and N. M. Amato. Shepherding behaviors. In Proc. IEEE Int. Conf. Robot.Autom. (ICRA), pages 4159–4164, April 2004.
+  \bibitem{design} O. B. Bayazit, G. Song, and N. M. Amato. Enhancing randomized motion planners: Exploring with haptic hints. In Proc. IEEE Int. Conf. Robot. Autom. (ICRA), pages 529–536, 2000.
+  \bibitem{bioinformatics} A. P. Singh, J.-C. Latombe, and D. L. Brutlag. A motion planning approach to flexible ligand binding. In Int. Conf. on Intelligent Systems for Molecular Biology (ISMB), pages 252–261, 1999.
+  \bibitem{ConCompNum} Delanoue, N.; Jaulin, L.; Cottenceau, B. (2006). "Counting the Number of Connected Components of a Set and Its Application to Robotics". Applied Parallel Computing, Lecture Notes in Computer Science 3732 (1).
+  \bibitem{interval} Jaulin, L. (2001). "Path planning using intervals and graphs". Reliable Computing 7 (1).  
   \bibitem{Book} Steven M. LaValle, "Planning Algorithms", Cambridge University Press, ISBN 0-521-86205-1, 2006.
   \bibitem{UMAPRM} Yeh, Hsin-Yi Cindy, et al. "UMAPRM: Uniformly Sampling the Medial Axis."
   \bibitem{RRT} LaValle, Steven M. "Rapidly-Exploring Random Trees A New Tool for Path Planning." (1998).
@@ -402,6 +422,7 @@ We worked hard, and achieved very little.
   \bibitem{MAPRM} Wilmarth, Steven A., Nancy M. Amato, and Peter F. Stiller. "MAPRM: A probabilistic roadmap planner with sampling on the medial axis of the free space." Robotics and Automation, 1999. Proceedings. 1999 IEEE International Conference on. Vol. 2. IEEE, 1999.
   \bibitem{MAPRM2} S. A. Wilmarth, N. M. Amato, and P. F. Stiller. MAPRM: A probabilistic roadmap planner with sampling on the medial axis of the free space. Technical Report TR98-022, Department of Computer Science, Texas A\&M University, College Station, TX, Nov. 1998.
   \bibitem{DualShape} Edelsbrunner, Herbert. "The union of balls and its dual shape." Proceedings of the ninth annual symposium on Computational geometry. ACM, 1993.
+  \bibitem{alpha intro} "Alpha Shape Introduction", Duck University, ($http://biogeometry.duke.edu/software/alphashapes/$)
   \bibitem{PointSetShape} Edelsbrunner, Herbert; Kirkpatrick, David G.; Seidel, Raimund (1983), "On the shape of a set of points in the plane", IEEE Transactions on Information Theory 29 (4): 551–559, doi:10.1109/TIT.1983.1056714.
   \bibitem{radical center} "Radical Center", From Wolfram MathWorld -- the web's most extensive mathematics resource. ($http://mathworld.wolfram.com/RadicalCenter.html$)
   \bibitem{PathNonexistance} Z. McCarthy. Bretl, and S. Hutchinson, "Proving path non-existence using sampling and alpha shapes," in IEEE International Conference on Robotics and Automation (ICRA), May 2012.
