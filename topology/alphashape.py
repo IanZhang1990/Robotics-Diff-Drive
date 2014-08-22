@@ -315,14 +315,21 @@ def buildDualShape(spheres):
 	simple_graph_edges = [];
 	for node_i in hypergraphNodes:
 		simp_node_i = find_simple_node( node_i, simple_graph_nodes );
+		#print node_i.nodes[0];
 		for node_j in hypergraphNodes:
 			simp_node_j = find_simple_node( node_j, simple_graph_nodes );
 			if node_i.has_edge( node_j, edges ):
 				edge = ( simp_node_i, simp_node_j, 1 );
-				#pygame.draw.line(DISPLAYSURF, (255,0,0), (int(node_i.nodes[0][0]), int(node_i.nodes[0][1])), (int(node_j.nodes[0][0]), int(node_j.nodes[0][1])), 2 );
-				#pygame.display.update();
+				pygame.draw.line(DISPLAYSURF, (255,0,0), (int(node_i.nodes[0][0]), int(node_i.nodes[0][1])), (int(node_j.nodes[0][0]), int(node_j.nodes[0][1])), 2 );
+				pygame.display.update();
 				simple_graph_edges.append( edge );
 
+	for node in simple_graph_nodes:
+		print node.value.nodes[0];
+		node.value = ( node.value.nodes[0][0], node.value.nodes[0][1]);
+		
+
+	
 	graph = Graph();
 	graph.add_nodes( simple_graph_nodes );
 	graph.add_edges( simple_graph_edges );
@@ -333,6 +340,7 @@ def buildDualShape(spheres):
 	breaked_graph.saveJson('./graph_drawing/data/broken_graph.json');
 	'''
 
+    
 
 	pygame.image.save( DISPLAYSURF, "AlphaShape.PNG" );
 

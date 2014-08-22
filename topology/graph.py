@@ -284,7 +284,7 @@ class Graph:
 		linkStr = "";
 		nodes = self.graphdict.keys();
 		for node in nodes:
-			nodeStr += "\t\t{\"name\":\"" + str(node.name) + "\", \"group\":"+ str(node.group) +"},\n";
+			nodeStr += "\t\t{\"name\":\"" + str(node.name) + "\", \"group\":"+ str(node.group) + ", \"value\":\"" + str(node.value)  +"\"},\n";
 			for edge in self.graphdict[node]:
 				linkStr += "\t\t{\"source\":"+ str(nodes.index(node)) +",\"target\":" + str(nodes.index(edge[0])) + ",\"value\":"+ str(edge[1]) +"},\n";
 

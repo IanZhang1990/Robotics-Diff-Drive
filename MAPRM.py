@@ -460,21 +460,25 @@ pntOnMA, dist = searcher.searchISO( gameWorld.obstMgr, gameWorld, 30, DISPLAYSUR
 #samples = sampler.sampleISOn(30, DISPLAYSURF);
 #samples  = sampler.sampleMAn(DISPLAYSURF);
 #sampler.save_data( samples, "masamples.txt" );
-samples  = sampler.load_data( "masamples.txt" );
-samples2 = sampler.sampleMA( 2000 );
-samples3 = sampler.sampleISOn( 34, samples );
+#samples  = sampler.load_data( "masamples.txt" );
+samples2 = sampler.sampleMA( 3000 );
+#samples3 = sampler.sampleISOn( 34, samples );
 
 print "Finished!"
-
+'''
 for sample in samples:
 	pygame.draw.circle( DISPLAYSURF, (220, 220, 220), (int(sample[0].x), int(sample[0].y)), int(sample[1]) );
-
+'''
 #for sample in samples:
 #	pygame.draw.circle( DISPLAYSURF, (20, 20, 20), (int(sample[0].x), int(sample[0].y)), int(sample[1]), 1 );
 
 for sample in samples2:
 	pygame.draw.line( DISPLAYSURF, (30, 30, 30), (int(sample[0].x), int(sample[0].y)),(int(sample[0].x), int(sample[0].y)), 2 );	
 
+gameWorld.render(DISPLAYSURF);
+pygame.image.save( DISPLAYSURF, './imgs/medialaxis.PNG' );
+
+sys.exit()
 #for sample in samples:
 #	pygame.draw.circle( DISPLAYSURF, (30, 30, 30), (int(sample[0].x), int(sample[0].y)), int(sample[1]), 1 );
 #   pygame.draw.line( DISPLAYSURF, (30, 30, 30), (int(sample[0].x), int(sample[0].y)),(int(sample[0].x), int(sample[0].y)), 2 );

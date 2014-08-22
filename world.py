@@ -10,17 +10,17 @@ from geometry import *
 
 
 class World:
-    '''World class'''
-    def __init__( self, width, height, obstacles, robot ):
-        self.WIDTH = width;
-        self.HEIGHT = height;
-        self.obstMgr = ObstManager( obstacles );
-        self.robot = robot;
+	'''World class'''
+	def __init__( self, width, height, obstacles, robot ):
+		self.WIDTH = width;
+		self.HEIGHT = height;
+		self.obstMgr = ObstManager( obstacles );
+		self.robot = robot;
 
-    def render(self, surface):
-        self.obstMgr.intersects( self.robot );
-        self.obstMgr.render(surface);
-        self.robot.render(surface);
+	def render(self, surface):
+		self.obstMgr.intersects( self.robot );
+		self.obstMgr.render(surface);
+		self.robot.render(surface);
 
 
 WIDTH = 800;
@@ -50,13 +50,13 @@ gameWorld = World( WIDTH, HEIGHT, obsts, diffDrive );
 
 
 ##################################################
-#####           Render the world
+#####		   Render the world
 ##################################################
 DISPLAYSURF.fill((240,235,240))
 for event in pygame.event.get():
-    if event.type == QUIT:
-        pygame.quit()
-        sys.exit()
+	if event.type == QUIT:
+		pygame.quit()
+		sys.exit()
 gameWorld.render( DISPLAYSURF );
 pygame.display.update();
 #pygame.image.save( DISPLAYSURF, 'world.PNG' );
@@ -64,19 +64,19 @@ pygame.display.update();
 
 '''
 while True:
-    DISPLAYSURF.fill((240,235,240))
+	DISPLAYSURF.fill((240,235,240))
 
-    #drawCircle( DISPLAYSURF, (850,850), 100 );
+	#drawCircle( DISPLAYSURF, (850,850), 100 );
 
-    for event in pygame.event.get():
-        if event.type == QUIT:
-            pygame.quit()
-            sys.exit()
-    
-    gameWorld.render( DISPLAYSURF );
+	for event in pygame.event.get():
+		if event.type == QUIT:
+			pygame.quit()
+			sys.exit()
+	
+	gameWorld.render( DISPLAYSURF );
 
-    pygame.display.update();
-    pass
+	pygame.display.update();
+	pass
 
 pygame.quit();
 '''
@@ -89,11 +89,12 @@ pygame.quit();
 
 
 ##################################################
-#####                   Sample
+#####				   Sample
 ##################################################
 
 
 sampler = SamplerV2( gameWorld );
 sampler.sample(2000, DISPLAYSURF);
 #sampler.sampleSlice( math.pi/4 );
-sampler.save_data('spheres_complete.txt');
+#sampler.save_data('spheres_complete.txt');
+pygame.image.save( DISPLAYSURF, './imgs/world.PNG' );
