@@ -263,7 +263,7 @@ configurations are inside the ball. We then project these (uniformly distributed
 
 \begin{figure}
 	\center{\includegraphics[scale=0.3]{./pics/Samples.PNG}}
-	\caption{\label{Samples} Samples got by the algorithm}
+	\caption{\label{Samples} Samples got by the algorithm. We have 43 medial axis samples(gray balls), and 76 regular samples(green balls). }
 \end{figure}
 
 %====================================
@@ -314,6 +314,8 @@ configurations are inside the ball. We then project these (uniformly distributed
 
 \indent Figure \ref{breakgraph} shows our algorithm to break a graph. The idea behind this algorithm is to take every edges as an initial component, then iterate each component to find and merge with a mergeable component until there is no two mergeable components.
 
+\indent Result of breaking Figure \ref{simplifiedgraph} can be seen in Figure \ref{broken}. 
+
 \indent By breaking a graph into several parts, we virtually break the space into several subspaces. In this sense, our method can be viewed as a space partition strategy.
 
 \begin{figure}
@@ -359,6 +361,11 @@ configurations are inside the ball. We then project these (uniformly distributed
 	{\includegraphics[scale=0.65]{./pics/initial2.png}}
 	{\includegraphics[scale=0.65]{./pics/broken2.png}}\
 	\caption{\label{brokengraphs} Some examples of breaking a graph. Graphs are visualized using $d3.js$ $(http://www.d3js.org)$ }
+\end{figure}
+
+\begin{figure}
+	\center{ \includegraphics[scale=0.4]{./pics/broken_graph.png} }
+	\caption{\label{broken}} Broken graph of Figure \ref{simplifiedgraph}. The graph is divided two parts. Merging these two components will create loop. 
 \end{figure}
 
 %====================================
@@ -435,9 +442,13 @@ configurations are inside the ball. We then project these (uniformly distributed
 %  \indent Let start and goal nodes be $S$ and $E$. Because $A$ and $B$ are two common nodes shared by $g_1$ and $g_2$, if $A \neq B$, merging $g_1$ and $g_2$ will create a graph with a loop going from $S \rightarrow A \rightarrow E \rightarrow B \rightarrow S$. The path in the upper of the loop and the path in the lower have different homotopy type. Since $\sigma_1$ and $\sigma_2$ have the same start and goal nodes, merging them will create a loop. So $\sigma_1$ and $\sigma_2$ have different homotopy type.
 
   \subsection{Fast Planning}
-  \indent\indent By breaking a graph into several parts, we virtually break the space into several subspaces. In this sense, our method can be viewed as a space partition strategy. Every subspace is managed by a tree, and trees are connected with shared common nodes. Every node in a tree represents a cell of power-diagram, as suggested by equation (3).
+  \indent\indent By breaking a graph into several components, we virtually break the space into several subspaces. Every subspace is managed by a tree, and trees are connected with shared common nodes. Every node in a tree represents a cell of power-diagram, as suggested by equation (3). 
+ 
+  \indent Consider each component as a graph node, connecting them will form a graph. A fast path searching algorithm will be: 1. search path between components, then 2. search path in each component. 
   
-  \indent 
+  \indent In the worst case of searching a graph, the time is 
+  
+  \indent fdaaaaaaaaaaaaaaaaaaaaaaaaagfdasgdsfagfdsafdsagdsafdsf
   
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -445,8 +456,32 @@ configurations are inside the ball. We then project these (uniformly distributed
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Experiments}\label{experiments}
-We now describe the some experiments and their results.
+\indent\indent We now describe some experiments and their results. We are planning for a point robot in workspace shown in Figure \ref{fig:Medial Axis}. Thus the workspace is the same as configuration space. 
 
+\subsection{Coverage of the space}
+
+\indent\indent Figure \ref{PvB} shows the relation between the number of initial configurations from Phase 1 and the number balls got in Phase 2. X axis ranges from  100 - 6000 with 100 increment as the number of initial configurations. Every setting runs 8 times. The number of balls in the Y axis is the average value of 8 results for each setting. With the increase of initial random configurations, the number of balls tends to be 120. 
+
+\indent Figure \ref{fig:Medial Axis} is a $800\times 800$ workspace for a point robot. By analyzing each pixel, we can know whether it is covered by balls and get its distance from obstacle. Figure \ref{uncovered} shows the relation between the number of initial configurations, number of pixels uncovered by balls and their distance from obstacles. The Y axis ranges from 100-7000 with 200 increment as numbers of initial random configurations in Phase 1. X axis indicates the distance from obstacles. And Z axis is the number of pixels uncovered by balls. The minimum radius of balls is 10. As we can see, with the increase of initial configurations, the number of uncovered pixels drops sharply. The maximum distance uncovered pixel also decrease very quickly.
+
+\begin{figure}
+	\center{ \includegraphics[scale=0.2]{./pics/Analysis_PvB.png} }
+	\caption{\label{PvB}} Relation between number of initial configurations and balls. The number of balls tends to be around 120.
+\end{figure}
+
+\begin{figure}
+	\center{ \includegraphics[scale=0.4]{./pics/overview_uncovered_pixels.PNG} }
+	\caption{\label{uncovered}} Relation between number of initial configurations, uncovered pixels and their distance from obstacles.
+\end{figure}
+
+\subsection{Searching for Optimal Path}
+
+\indent\indent Balls generated in Phase 2 can be used to find near optimal paths using \emph{A*} algorithm. We are virtually building a graph by discretizing balls to boundary configurations. Every configuration is ``connected" to boundary configurations of the ball it is in. The difference between a \emph{PRM} is that we are not storing any connection information between configurations explicitly.  
+
+\begin{figure}
+	\center{ \includegraphics[scale=0.35]{./pics/AstarSearch.PNG} }
+	\caption{\label{Astar}} Using \emph{A*} search algorithm to find an optimal path. We discretize balls to configurations on their boundaries. Thus, successors of a configuration are other boundary configurations of the ball current configuration is in. 
+\end{figure}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %	Conclusions and Future work
 %
@@ -487,7 +522,7 @@ We now describe the some experiments and their results.
   \bibitem{radical center} ``Radical Center", From Wolfram MathWorld -- the web's most extensive mathematics resource. ($http://mathworld.wolfram.com/RadicalCenter.html$)
   \bibitem{PathNonexistance} Z. McCarthy. Bretl, and S. Hutchinson, ``Proving path non-existence using sampling and alpha shapes," in IEEE International Conference on Robotics and Automation (ICRA), May 2012.
   \bibitem{betti wiki} ``Betti Number", From Wikipedia -- The Free Encyclopedia. ( $http://en.wikipedia.org/wiki/Betti_number$ )   
-  \bibitem{cyclomatic} GYULA KAROLYI, AMBRUS PAL, ``The cyclomatic number of connected graphs without solvable orbits", Periodica Mathematica Hungarica, 01/2007; 
+  \bibitem{cyclomatic} Gyula Karolyi, Ambrus Pal, ``The cyclomatic number of connected graphs without solvable orbits", Periodica Mathematica Hungarica, 01/2007; 
   \bibitem{Edel Book}Edelsbrunner, Herbert, and John Harer. ``Computational topology: an introduction." American Mathematical Soc., 2010. page. 88 - 93.
   \bibitem{alpha betti} Robins, Vanessa. ``Computational topology for point data: Betti numbers of α-shapes." Morphology of Condensed Matter. Springer Berlin Heidelberg, 2002. 261-274.
 \end{thebibliography}

@@ -334,11 +334,11 @@ def buildDualShape(spheres):
 	graph.add_nodes( simple_graph_nodes );
 	graph.add_edges( simple_graph_edges );
 	graph.saveJson('./graph_drawing/data/graph2.json');
-	'''
+	
 	graphBreaker = GraphBreaker(graph);
 	breaked_graph = graphBreaker.break_it();
 	breaked_graph.saveJson('./graph_drawing/data/broken_graph.json');
-	'''
+	
 
     
 

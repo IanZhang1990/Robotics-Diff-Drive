@@ -182,9 +182,9 @@ class Graph:
 		new_graph_loop_free = merged_graph.loop_free();
 
 		nodes = merged_graph.get_all_nodes();
-		for node in nodes:
-			if len(merged_graph.get_edges_of( node )) > 2:
-				return False;
+		#for node in nodes:
+		#	if len(merged_graph.get_edges_of( node )) > 2:
+		#		return False;
 
 		return share_nodes and new_graph_loop_free;
 
