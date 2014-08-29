@@ -151,6 +151,8 @@ Covering both the configuration space, or \emph{C-space}, and represent the righ
 
 \indent Proof of this equation can be found in \cite{cyclomatic}.
 
+
+
 \indent H. Edelsbrunner introduced a way to compute \emph{n-th} Betti number in \cite{Edel Book}, where he uses gaussian elimination to compute the Betti numbers with adjacency matrix.
 
 \indent V. Robins \cite{alpha betti} provided a computational technique for computing Betti numbers with detailed explains and proofs. What's more, she put more thoughts on computing Betti numbers for alpha shapes.
@@ -281,7 +283,7 @@ configurations are inside the ball. We then project these (uniformly distributed
 
 \indent One might argue that we can simply get configurations on medial axis and connect them as a roadmap. However, this roadmap doesn't maintain the topology of \emph{C-space}. At some corners, we will still get triangles which don't have information if there are obstacles inside the triangle. By building the dual shape, this will no longer be a problem. 
 
-\indent The second part of this phase can be stated as: retract all connected 2-simplices into one point, reconnect these retracted points with other ones using their previous connection. By doing so, we got a simple graph that characterize the topology of \emph{C-space}. We would like to call it \emph{Topology Roadmap}. This roadmap can also be used to determine if paths exist between two configurations. An example of such roadmap is shown in Figure \ref{simplifiedgraph}. Filled triangles, along with large balls, are suggesting some large open areas, which is a problem \cite{largeconvex} is trying to address. 
+\indent The second part of this phase can be stated as: retract all connected 2-simplices into one point, while keep check the 1st betti number of these merged 2-simplices, reconnect these retracted points with other ones using their previous connection information. By doing so, we got a simple graph that characterize the topology of \emph{C-space}. We would like to call it \emph{Topology Roadmap}. This roadmap can also be used to determine if paths exist between two configurations. An example of such roadmap is shown in Figure \ref{simplifiedgraph}. Filled triangles, along with large balls, are suggesting some large open areas, which is a problem \cite{largeconvex} is trying to address. 
 
 \indent This is not the only method of building the topology roadmap of \emph{C-space}, another option will be to build a visibility roadmap, like \cite{vprm}, but using only ball centers as roadmap nodes. One might come up with other heuristics to achieve the same thing. Due to the limited number of balls, any algorithms can have a good performance. 
 
