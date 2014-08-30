@@ -232,7 +232,7 @@ class Graph:
 		for edge in self.graphdict[start]:
 			node = edge[0];
 			if node not in path:
-				newpaths = find_all_paths(self.graphdict, node, end, path);
+				newpaths = self.find_all_paths( node, end, path);
 				for newpath in newpaths:
 					paths.append(newpath);
 		return paths;

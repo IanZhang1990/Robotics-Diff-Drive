@@ -325,7 +325,7 @@ def buildDualShape(spheres):
 				simple_graph_edges.append( edge );
 
 	for node in simple_graph_nodes:
-		print node.value.nodes[0];
+		#print node.value.nodes[0];
 		node.value = ( node.value.nodes[0][0], node.value.nodes[0][1]);
 		
 
@@ -334,12 +334,19 @@ def buildDualShape(spheres):
 	graph.add_nodes( simple_graph_nodes );
 	graph.add_edges( simple_graph_edges );
 	graph.saveJson('./graph_drawing/data/graph2.json');
-	
+	'''
 	graphBreaker = GraphBreaker(graph);
 	breaked_graph = graphBreaker.break_it();
 	breaked_graph.saveJson('./graph_drawing/data/broken_graph.json');
-	
+	'''
 
+	paths = graph.find_all_paths(simple_graph_nodes[12], simple_graph_nodes[21]);
+	for path in paths:
+		print "=========================================\n";
+		pathStr = '';
+		for node in path:
+			pathStr += str(node.name) + '\t';
+		print pathStr
     
 
 	pygame.image.save( DISPLAYSURF, "AlphaShape.PNG" );

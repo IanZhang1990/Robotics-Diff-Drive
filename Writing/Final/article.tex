@@ -151,14 +151,31 @@ Covering both the configuration space, or \emph{C-space}, and represent the righ
 
 \indent Proof of this equation can be found in \cite{cyclomatic}.
 
+\indent While computing the betti number for filed triangles in 2D is not difficult too. Delfinado, et al, \cite{incre_betti} provided an incremental algorithm to compute betti numbers in arbitrary dimensions. In our case, we need only 1st betti number. Its algorithm can be stated as:
 
+\begin{algorithmic}[1]
+	\Function {IncrementalBetti}{$\sigma_1, \sigma_2, ..., \sigma_m$}
+		\State $\beta_0 = \beta_1 = \beta_2 = 0$
+		\For {$i \in $ \emph{0 to m}}
+			\If {$\sigma_i$ \emph{belongs to a k-cycle of $K_i$}}
+				\State $\beta_k \gets \beta_k + 1$
+			\Else
+				\State $\beta_{k-1} \gets \beta_{k-1} -1$
+			\EndIf
+		\EndFor
+	\EndFunction 
+\end{algorithmic}
+
+where $\sigma_1, \sigma_2, ..., \sigma_m$ is a sequence of simplices, and $K_i = \{ \sigma_1, \sigma_2, ..., \sigma_i \}$.
+
+\indent The proof of correctness of the algorithm can be found in \cite{incre_betti}. \\
 
 \indent H. Edelsbrunner introduced a way to compute \emph{n-th} Betti number in \cite{Edel Book}, where he uses gaussian elimination to compute the Betti numbers with adjacency matrix.
 
 \indent V. Robins \cite{alpha betti} provided a computational technique for computing Betti numbers with detailed explains and proofs. What's more, she put more thoughts on computing Betti numbers for alpha shapes.
 
 \begin{figure}
-	\center{\includegraphics[scale=0.26]{./pics/Torus.png}}
+	\center{\includegraphics[scale=0.28]{./pics/Torus.png}}
 	\caption{\label{fig:Torus} The torus has one connected component($\beta_0$), two circular holes ($\beta_1$,the one in the center and the one in the middle of the "donut"), and one two-dimensional void ($\beta_2$, the inside of the "donut"). Copied from \cite{betti wiki}}
 \end{figure}
 
@@ -283,7 +300,7 @@ configurations are inside the ball. We then project these (uniformly distributed
 
 \indent One might argue that we can simply get configurations on medial axis and connect them as a roadmap. However, this roadmap doesn't maintain the topology of \emph{C-space}. At some corners, we will still get triangles which don't have information if there are obstacles inside the triangle. By building the dual shape, this will no longer be a problem. 
 
-\indent The second part of this phase can be stated as: retract all connected 2-simplices into one point, while keep check the 1st betti number of these merged 2-simplices, reconnect these retracted points with other ones using their previous connection information. By doing so, we got a simple graph that characterize the topology of \emph{C-space}. We would like to call it \emph{Topology Roadmap}. This roadmap can also be used to determine if paths exist between two configurations. An example of such roadmap is shown in Figure \ref{simplifiedgraph}. Filled triangles, along with large balls, are suggesting some large open areas, which is a problem \cite{largeconvex} is trying to address. 
+\indent The second part of this phase can be stated as: retract all connected 2-simplices into one point, while keep check the 1st betti number of these merged 2-simplices( using the algorithm described in \cite{incre_betti} ), reconnect these retracted points with other ones using their previous connection information. By doing so, we got a simple graph that characterize the topology of \emph{C-space}. We would like to call it \emph{Topology Roadmap}. This roadmap can also be used to determine if paths exist between two configurations. An example of such roadmap is shown in Figure \ref{simplifiedgraph}. Filled triangles, along with large balls, are suggesting some large open areas, which is a problem \cite{largeconvex} is trying to address. 
 
 \indent This is not the only method of building the topology roadmap of \emph{C-space}, another option will be to build a visibility roadmap, like \cite{vprm}, but using only ball centers as roadmap nodes. One might come up with other heuristics to achieve the same thing. Due to the limited number of balls, any algorithms can have a good performance. 
 
@@ -448,9 +465,7 @@ configurations are inside the ball. We then project these (uniformly distributed
  
   \indent Consider each component as a graph node, connecting them will form a graph. A fast path searching algorithm will be: 1. search path between components, then 2. search path in each component. 
   
-  \indent In the worst case of searching a graph, the time is 
-  
-  \indent fdaaaaaaaaaaaaaaaaaaaaaaaaagfdasgdsfagfdsafdsagdsafdsf
+  \indent In the worst case of searching a graph, the time is exponential to the length of the path. but it could be polynomial if the graph is actually a tree.  While breaking a graph into several components, these components form a new graph with much less nodes. Even in the worst case, the search for path between components can be much faster than original graph. Then we search in each components(trees) with smaller size compare to the whole graph. The time cost should be less then search the original graph directly. 
   
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -484,6 +499,35 @@ configurations are inside the ball. We then project these (uniformly distributed
 	\center{ \includegraphics[scale=0.35]{./pics/AstarSearch.PNG} }
 	\caption{\label{Astar}} Using \emph{A*} search algorithm to find an optimal path. We discretize balls to configurations on their boundaries. Thus, successors of a configuration are other boundary configurations of the ball current configuration is in. 
 \end{figure}
+
+\subsection{Different Homotopy Type Paths }
+\indent\indent In last section, we searched the near optimal path between two configurations. Now we will show how to find paths with different homotopy types.
+
+\indent The corresponding start and goal nodes in the simplified graph( Figure \ref{simplifiedgraph} ) is 12 and 21. Searching the graph for all paths will give us paths with different homotopy types. Figure \ref{paths} shows the 8 different paths.
+
+\begin{enumerate}
+	\item 12--6--19--10--2--0--4--8--1--20--7--21	
+	\item 12--6--19--10--2--0--11--14--21	
+	\item 12--6--19--10--2--23--5--17--3--1--8--4--0--11--14--21	
+	\item 12--6--19--10--2--23--5--17--3--1--20--7--21	
+	\item 12--13--9--3--1--8--4--0--11--14--21	
+	\item 12--13--9--3--1--20--7--21	
+	\item 12--13--9--3--17--5--23--2--0--4--8--1--20--7--21	
+	\item	12--13--9--3--17--5--23--2--0--11--14--21	
+\end{enumerate}
+
+\begin{figure}
+	{\includegraphics[scale=0.28]{./pics/paths/1.png}}
+	{\includegraphics[scale=0.28]{./pics/paths/2.png}}
+	{\includegraphics[scale=0.28]{./pics/paths/3.png}}
+	{\includegraphics[scale=0.28]{./pics/paths/4.png}}
+	{\includegraphics[scale=0.28]{./pics/paths/5.png}}
+	{\includegraphics[scale=0.28]{./pics/paths/6.png}}
+	{\includegraphics[scale=0.28]{./pics/paths/7.png}}
+	{\includegraphics[scale=0.28]{./pics/paths/8.png}}
+	\caption{\label{paths} 8 paths with different homotopy types. }
+\end{figure}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %	Conclusions and Future work
 %
@@ -493,12 +537,13 @@ configurations are inside the ball. We then project these (uniformly distributed
 
 \indent However, we don't know what kind of issues there will be when implementing for high dimensional space. The time cost for constructing weighted $\alpha$-shape( dual shape ) of unions of balls is a concern. Because we need to check each \emph{k-simplex} while $k = 1, 2, 3, ..., d$, $d$ being the dimensions. So, our next goal is to implement the algorithm for 3D case, and then higher dimensions.
 
-\indent Our next direction is to study the properties and applications of weighted $\alpha$-shape, especially applications in bioinformatics and chemistry, then extend to high dimensions.
+\indent There are many directions we can go from here.
 
-\indent Another direction will be studying the topology using the topology roadmap we constructed. Its value is underestimated in this paper, and I believe we can find more there.
+\indent We can use the topology roadmap to study paths and their topology in C-space. We can analyze the shape of C-space and locate large open area. We can try to use this presentations for nonholonomic motion planning problems. 
 
 \bibliographystyle{abbrv}
 \begin{thebibliography}{1}
+  \bibitem{incre_betti} Delfinado, Cecil Jose A., and Herbert Edelsbrunner. "An incremental algorithm for Betti numbers of simplicial complexes on the 3-sphere." Computer Aided Geometric Design 12.7 (1995): 771-784.
   \bibitem{weifu} Weifu Wang, Devin Balkcom, Amit Chakrabarti, ``A fast streaming spanner algorithm for incrementally constructing sparse roadmaps", IROS 2013.
   \bibitem{bekris} Marble J and Bekris KE. ``Asymptotically near-optimal planning with probabilistic roadmap spanners", IEEE Transactions on Robotics, 29(3), 2013.
   \bibitem{largeconvex} Robin L H Deits and Russ Tedrake. ``Computing large convex regions of obstacle-free space through semidefinite programming". In Proceedings of the Eleventh International Workshop on the Algorithmic Foundations of Robotics (WAFR 2014), Istanbul, 2014.
